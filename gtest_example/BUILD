@@ -5,7 +5,7 @@ cc_library(
     srcs = ["hello_time.cc"],
     hdrs = ["hello_time.h"],
     deps = ["@com_google_absl//absl/strings"],
-    visibility = ["//main:__pkg__"],
+    visibility = ["//json_example:__pkg__"],
 )
 
 cc_test(

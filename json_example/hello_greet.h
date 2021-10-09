@@ -3,10 +3,10 @@
 
 #include <string>
 
-namespace fep::main {
+namespace fep::json_example {
 
 std::string get_greet(const std::string &thing);
 
-} // namespace fep::main
+} // namespace fep::json_example
 
 #endif

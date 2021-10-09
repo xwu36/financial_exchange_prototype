@@ -1,11 +1,11 @@
-#ifndef LIB_HELLO_TIME_H_
-#define LIB_HELLO_TIME_H_
+#ifndef GTEST_EXAMPLE_HELLO_TIME_H_
+#define GTEST_EXAMPLE_HELLO_TIME_H_
 
 #include <string>
 
 #include "absl/strings/string_view.h"
 
-namespace fep::lib {
+namespace fep::gtest_example {
 
 void print_localtime();
 
@@ -18,6 +18,6 @@ private:
   const std::string kName = "Hello Time";
 };
 
-} // namespace fep::lib
+} // namespace fep::gtest_example
 
 #endif

@@ -1,8 +1,8 @@
-#include "lib/hello_time.h"
+#include "gtest_example/hello_time.h"
 
 #include "gtest/gtest.h"
 
-namespace fep::lib {
+namespace fep::gtest_example {
 namespace {
 
 TEST(HelloTimeTest, GetName) {
@@ -11,4 +11,4 @@ TEST(HelloTimeTest, GetName) {
 }
 
 } // namespace
-} // namespace fep::lib
+} // namespace fep::gtest_example

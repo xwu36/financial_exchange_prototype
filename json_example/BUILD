@@ -11,7 +11,7 @@ cc_binary(
     srcs = ["hello_world.cc"],
     deps = [
         ":hello_greet",
-        "//lib:hello_time",
+        "//gtest_example:hello_time",
         "@com_github_nlohmann_json//:json"
     ],
     data = ["hello_world_message.json"]
