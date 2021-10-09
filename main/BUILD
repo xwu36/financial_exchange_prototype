@@ -12,7 +12,9 @@ cc_binary(
     deps = [
         ":hello_greet",
         "//lib:hello_time",
+        "@com_github_nlohmann_json//:json"
     ],
+    data = ["hello_world_message.json"]
 )
 
 cc_test(
