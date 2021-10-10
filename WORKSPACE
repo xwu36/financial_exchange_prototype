@@ -20,3 +20,21 @@ http_archive(
     strip_prefix = "json-3.9.1",
     urls = ["https://github.com/nlohmann/json/archive/v3.9.1.tar.gz"],
 )
+
+git_repository(
+    name = "glog",
+    remote = "https://github.com/google/glog.git",
+    tag = "v0.4.0",
+)
+
+git_repository(
+    name = "com_github_gflags_gflags",
+    remote = "https://github.com/gflags/gflags.git",
+    tag = "v2.2.2",
+)
+
+new_local_repository(
+    name = "usr_local",
+    build_file = "third_party/usr_local.BUILD",
+    path = "/usr/local",
+)

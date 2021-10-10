@@ -2,8 +2,10 @@
 
 #include <cctype>
 #include <string>
+#include <system_error>
 
 #include "absl/strings/str_cat.h"
+#include "glog/logging.h"
 
 namespace fep::lib {
 
@@ -32,13 +34,15 @@ Price4::Price4(const std::string &str) {
   unscaled_ = 0;
   if (valid_price(str)) {
     unscaled_ = static_cast<long>(std::stof(str) * kScale4);
+  } else {
+    LOG(ERROR) << "Invalid price: ";
   }
 }
 
 std::string Price4::to_str() const {
   const long first_half = unscaled_ / kScale4;
   const long second_half = unscaled_ / 100 - first_half * 100;
-  return absl::StrCat(first_half, "", second_half);
+  return absl::StrCat(first_half, ".", second_half);
 }
 
 } // namespace fep::lib

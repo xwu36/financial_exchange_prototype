@@ -4,7 +4,10 @@ cc_library(
     name = "price4",
     srcs = ["price4.cc"],
     hdrs = ["price4.h"],
-    deps = ["@com_google_absl//absl/strings"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@glog",
+    ],
 )
 
 cc_test(

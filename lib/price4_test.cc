@@ -7,7 +7,7 @@ namespace {
 
 TEST(Price4Test, ParsedFromStringAllDigits) {
   const Price4 price("1234");
-  EXPECT_EQ(price.unscaled(), 123400);
+  EXPECT_EQ(price.unscaled(), 12340000);
 }
 
 TEST(Price4Test, ParsedFromStringWithAPeriod) {
