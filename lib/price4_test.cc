@@ -31,5 +31,18 @@ TEST(Price4Test, ToString) {
   EXPECT_EQ(price.to_str(), "9.90");
 }
 
+TEST(Price4Test, CompareOperators) {
+  const Price4 price1(1);
+  const Price4 price2(2);
+  EXPECT_TRUE(price1 == price1);
+  EXPECT_TRUE(price1 != price2);
+  EXPECT_TRUE(price1 <= price1);
+  EXPECT_TRUE(price1 <= price2);
+  EXPECT_TRUE(price1 < price2);
+  EXPECT_TRUE(price2 > price1);
+  EXPECT_TRUE(price2 >= price1);
+  EXPECT_TRUE(price2 >= price2);
+}
+
 } // namespace
 } // namespace fep::lib

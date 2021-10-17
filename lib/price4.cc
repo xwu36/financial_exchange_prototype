@@ -35,7 +35,7 @@ Price4::Price4(const std::string &str) {
   if (valid_price(str)) {
     unscaled_ = static_cast<long>(std::stof(str) * kScale4);
   } else {
-    LOG(ERROR) << "Invalid price: ";
+    LOG(ERROR) << absl::StrCat("Invalid price: ", str);
   }
 }
 

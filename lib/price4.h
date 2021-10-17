@@ -15,6 +15,25 @@ public:
   explicit Price4(const std::string &str);
   long unscaled() const { return unscaled_; }
 
+  bool operator==(const Price4 &that) const {
+    return this->unscaled() == that.unscaled();
+  }
+  bool operator!=(const Price4 &that) const {
+    return this->unscaled() != that.unscaled();
+  }
+  bool operator<(const Price4 &that) const {
+    return this->unscaled() < that.unscaled();
+  }
+  bool operator<=(const Price4 &that) const {
+    return this->unscaled() <= that.unscaled();
+  }
+  bool operator>(const Price4 &that) const {
+    return this->unscaled() > that.unscaled();
+  }
+  bool operator>=(const Price4 &that) const {
+    return this->unscaled() >= that.unscaled();
+  }
+
   // Converst to string.
   std::string to_str() const;
 
