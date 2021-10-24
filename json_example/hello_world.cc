@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
   std::cout << fep::json_example::get_greet(who) << std::endl;
   fep::gtest_example::print_localtime();
 
-  std::ifstream ifs("main/hello_world_message.json");
+  std::ifstream ifs("json_example/hello_world_message.json");
   std::string line; 
   nlohmann::json j = nlohmann::json::parse(ifs);
   std::cout << "Message from json message is: " << j << std::endl;

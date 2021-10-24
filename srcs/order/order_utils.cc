@@ -1,5 +1,7 @@
 #include "srcs/order/order_utils.h"
 
+#include <iostream>
+#include <fstream>
 #include <string>
 
 #include "lib/price4.h"
@@ -38,11 +40,30 @@ namespace fep::srcs::order
     const std::string &limit_price = data.at("limit_price");
     order.price = fep::lib::Price4(limit_price);
 
-    const auto &order_type = data.at("order_type");
-    if (order_type == "MARKET")
-      order.order_type = OrderType::MARKET;
-    else if (order_type == "LIMIT")
-      order.order_type = OrderType::LIMIT;
+    order.order_type = OrderType::LIMIT;
+    if (data.contains("order_type"))
+    {
+      const auto &order_type = data.at("order_type");
+      if (order_type == "MARKET")
+      {
+        order.order_type = OrderType::MARKET;
+      }
+    }
+  }
+
+  std::vector<Order> ReadOrdersFromPath(const std::string &path)
+  {
+    std::string line;
+    std::ifstream infile(path);
+    std::vector<Order> orders;
+    while (std::getline(infile, line))
+    {
+      json j = json::parse(line);
+      Order order;
+      FromJson(j, order);
+      orders.emplace_back(order);
+    }
+    return orders;
   }
 
 } // namespace fep::srcs::order

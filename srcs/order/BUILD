@@ -1,4 +1,6 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//srcs:__subpackages__"])
 
 cc_library(
     name = "order",
@@ -15,8 +17,11 @@ cc_test(
     deps = [
         ":order",
         ":order_utils",
+        "//lib:price4",
         "@com_google_googletest//:gtest_main",
     ],
+    data = ["test_data/orders.jsonl"]
+
 )
 
 cc_library(
