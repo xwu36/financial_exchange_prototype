@@ -7,19 +7,21 @@
 #include "srcs/order/order_book.h"
 #include "srcs/order/order_pool.h"
 
-namespace fep::srcs::matching_engine {
+namespace fep::srcs::matching_engine
+{
 
-class MatchingEngine {
+  class MatchingEngine
+  {
   public:
-  MatchingEngine() = default;
+    MatchingEngine() = default;
 
-  void ProcessOrder(const fep::srcs::order::Order& order);
+    void Sell(std::unique_ptr<fep::srcs::order::Order> order);
 
   private:
-  fep::srcs::order::OrderPool order_pool;
-  fep::srcs::order::OrderBook<fep::srcs::order::BidComparator> bid_order_book;
-  fep::srcs::order::OrderBook<fep::srcs::order::AskComparator> ask_order_book;
-};
+    fep::srcs::order::OrderPool order_pool_;
+    fep::srcs::order::OrderBook<fep::srcs::order::BidComparator> bid_order_book_;
+    fep::srcs::order::OrderBook<fep::srcs::order::AskComparator> ask_order_book_;
+  };
 
 } // namespace fep::srcs::matching_engine
 #endif

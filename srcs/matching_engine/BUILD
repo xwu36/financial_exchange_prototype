@@ -16,10 +16,13 @@ cc_library(
 )
 
 cc_test(
-    name = "price4_test",
-    srcs = ["price4_test.cc"],
+    name = "matching_engine_test",
+    srcs = ["matching_engine_test.cc"],
     deps = [
+        ":matching_engine",
+        "//srcs/order:order",
+        "//srcs/order:order_book_entry",
         "@com_google_googletest//:gtest_main",
-        "price4",
-    ],
+        "@com_github_nlohmann_json//:json",
+    ]
 )

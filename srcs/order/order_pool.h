@@ -16,11 +16,11 @@ namespace fep::srcs::order
     // Returns false if the order_id is already present in the pool.
     bool AddOrder(std::unique_ptr<Order> order)
     {
-      if (id_to_order_map_.find(order->order_id) != id_to_order_map_.end())
+      if (id_to_order_map_.find(order->order_id()) != id_to_order_map_.end())
       {
         return false;
       }
-      id_to_order_map_[order->order_id].swap(order);
+      id_to_order_map_[order->order_id()].swap(order);
       return true;
     }
 
@@ -38,7 +38,7 @@ namespace fep::srcs::order
 
     // Returns order detail for a given order_id.
     // Returns a nullptr if the order_id is not present in the pool.
-    const Order *GetOrder(const int64_t order_id)
+    Order *GetOrder(const int64_t order_id)
     {
       const auto &kv = id_to_order_map_.find(order_id);
       if (kv == id_to_order_map_.end())
@@ -56,7 +56,7 @@ namespace fep::srcs::order
       {
         return false;
       }
-      kv->second->quantity += quantity_delta;
+      kv->second->set_quantity(kv->second->quantity() + quantity_delta);
       return true;
     }
 

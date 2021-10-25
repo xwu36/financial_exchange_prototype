@@ -20,3 +20,24 @@ cc_test(
         "price4",
     ],
 )
+
+cc_library(
+    name = "trade_message",
+    hdrs = ["trade_message.h"],
+    srcs = ["trade_message.cc"],
+    deps = [
+        ":price4",
+        "@com_github_nlohmann_json//:json",
+        "@com_google_absl//absl/strings",
+        "@glog",
+    ],
+)
+
+cc_test(
+    name = "trade_message_test",
+    srcs = ["trade_message_test.cc"],
+    deps = [
+        ":trade_message",
+        "@com_google_googletest//:gtest_main",
+    ],
+)

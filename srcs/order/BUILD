@@ -5,10 +5,23 @@ package(default_visibility = ["//srcs:__subpackages__"])
 cc_library(
     name = "order",
     hdrs = ["order.h"],
+    srcs = ["order.cc"],
     deps = [
         "//lib:price4",
         "//srcs/stock:instrument_symbol",
+        "@com_github_nlohmann_json//:json",
     ],
+)
+
+cc_test(
+    name = "order_test",
+    srcs = ["order_test.cc"],
+    deps = [
+        ":order",
+        "@com_google_googletest//:gtest_main",
+    ],
+    data = ["test_data/orders.jsonl"]
+
 )
 
 cc_test(
@@ -30,9 +43,7 @@ cc_library(
     srcs = ["order_utils.cc"],
     deps = [
         ":order",
-        "//lib:price4",
-        "//srcs/stock:instrument_symbol",
-        "@com_github_nlohmann_json//:json"
+        "@com_github_nlohmann_json//:json",
     ],
 )
 
@@ -76,5 +87,6 @@ cc_test(
     deps = [
         ":order_pool",
         "@com_google_googletest//:gtest_main",
+        "@com_github_nlohmann_json//:json",
     ]
 )

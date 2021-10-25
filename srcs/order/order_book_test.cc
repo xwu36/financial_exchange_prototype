@@ -8,10 +8,11 @@
 namespace fep::srcs::order
 {
 
-  using lib::Price4;
-
   namespace
   {
+
+    using ::fep::lib::Price4;
+
     class OrderBookTest : public testing::Test
     {
     protected:

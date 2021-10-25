@@ -1,4 +1,4 @@
-#ifndef LIB_PRICE4_H_
+#ifndef LIB_PRICE5_H_
 #define LIB_PRICE4_H_
 
 #include <string>
