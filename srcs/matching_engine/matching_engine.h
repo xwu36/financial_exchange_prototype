@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "external/com_google_absl/absl/status/statusor.h"
+#include "lib/trade_message.h"
 #include "srcs/order/order.h"
 #include "srcs/order/order_book.h"
 #include "srcs/order/order_pool.h"
@@ -14,10 +16,12 @@ namespace fep::srcs::matching_engine
   {
   public:
     MatchingEngine() = default;
-
-    void Sell(std::unique_ptr<fep::srcs::order::Order> order);
+    absl::StatusOr<fep::lib::TradeMessage> Process(std::unique_ptr<fep::srcs::order::Order> order);
 
   private:
+    absl::StatusOr<fep::lib::TradeMessage> Sell(std::unique_ptr<fep::srcs::order::Order> order);
+    absl::StatusOr<fep::lib::TradeMessage> Buy(std::unique_ptr<fep::srcs::order::Order> order);
+
     fep::srcs::order::OrderPool order_pool_;
     fep::srcs::order::OrderBook<fep::srcs::order::BidComparator> bid_order_book_;
     fep::srcs::order::OrderBook<fep::srcs::order::AskComparator> ask_order_book_;

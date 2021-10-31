@@ -77,6 +77,7 @@ cc_library(
     name = "order_pool",
     hdrs = ["order_pool.h"],
     deps = [
+        "//lib:price4",
         ":order",
     ]
 )

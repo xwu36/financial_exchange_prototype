@@ -10,6 +10,7 @@ namespace fep::srcs::order
   namespace
   {
 
+    using ::fep::lib::Price4;
     using ::nlohmann::json;
 
     TEST(OrderPoolTest, GetOrder)
@@ -40,5 +41,45 @@ namespace fep::srcs::order
       EXPECT_EQ(pool.GetOrder(/* order_id = */ 2)->quantity(), 400);
     }
 
+    TEST(OrderPoolTest, GetQuantityForPrice)
+    {
+      json order1_json = {
+          {"order_id", 1},
+          {
+              "quantity",
+              10,
+          },
+          {"limit_price", "1.1"}};
+      json order2_json = {
+          {"order_id", 2},
+          {
+              "quantity",
+              20,
+          },
+          {"limit_price", "2.2"}};
+      json order3_json = {
+          {"order_id", 3},
+          {
+              "quantity",
+              30,
+          },
+          {"limit_price", "1.1"}};
+      std::unique_ptr<Order> order1 = std::make_unique<Order>(order1_json);
+      std::unique_ptr<Order> order2 = std::make_unique<Order>(order2_json);
+      std::unique_ptr<Order> order3 = std::make_unique<Order>(order3_json);
+
+      OrderPool pool;
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 0);
+      EXPECT_TRUE(pool.AddOrder(std::move(order1)));
+      EXPECT_TRUE(pool.AddOrder(std::move(order2)));
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 10);
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("2.2")), 20);
+      EXPECT_TRUE(pool.AddOrder(std::move(order3)));
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 40);
+      EXPECT_TRUE(pool.RemoveOrder(3));
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 10);
+      EXPECT_TRUE(pool.ModifyOrder(1, -5));
+      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 5);
+    }
   } // namespace
 } // namespace fep::srcs::order

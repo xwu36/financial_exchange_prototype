@@ -55,6 +55,9 @@ namespace fep::lib
   {
     const long first_half = unscaled_ / kScale4;
     const long second_half = unscaled_ / 100 - first_half * 100;
+    if(second_half < 10) {
+      return absl::StrCat(first_half, ".", "0", second_half);
+    }
     return absl::StrCat(first_half, ".", second_half);
   }
 

@@ -7,9 +7,12 @@ cc_library(
     srcs = ["matching_engine.cc"],
     hdrs = ["matching_engine.h"],
     deps = [
+        "//lib:price4",
+        "//lib:trade_message",
         "//srcs/order:order_book",
         "//srcs/order:order_pool",
         "//srcs/order:order",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@glog",
     ],

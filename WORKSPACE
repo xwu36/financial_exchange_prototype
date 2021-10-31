@@ -7,10 +7,24 @@ git_repository(
     tag = "release-1.11.0",
 )
 
-git_repository(
+# ABSL cpp library lts_2021_03_24 Patch2
+# See https://github.com/abseil/abseil-cpp/releases for details.
+# Needed for absl/status and absl/status:statusor
+http_archive(
     name = "com_google_absl",
-    remote = "https://github.com/abseil/abseil-cpp.git",
-    tag = "20200225.2",
+    build_file = "//third_party:com_google_absl.BUILD",
+    urls = [
+        "https://github.com/abseil/abseil-cpp/archive/20210324.2.tar.gz",
+    ],
+    # Remove after https://github.com/abseil/abseil-cpp/issues/326 is solved.
+    patches = [
+        "@//third_party:com_google_absl_f863b622fe13612433fdf43f76547d5edda0c93001.diff"
+    ],
+    patch_args = [
+        "-p1",
+    ],
+    strip_prefix = "abseil-cpp-20210324.2",
+    sha256 = "59b862f50e710277f8ede96f083a5bb8d7c9595376146838b9580be90374ee1f"
 )
 
 http_archive(

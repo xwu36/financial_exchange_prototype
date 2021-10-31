@@ -1,4 +1,4 @@
-#ifndef LIB_PRICE5_H_
+#ifndef LIB_PRICE4_H_
 #define LIB_PRICE4_H_
 
 #include <string>
@@ -50,5 +50,21 @@ namespace fep::lib
   };
 
 } // namespace fep::lib
+
+namespace std
+{
+  template <>
+  struct hash<fep::lib::Price4>
+  {
+    std::size_t operator()(const fep::lib::Price4& k) const
+    {
+      // Compute individual hash values for first,
+      // second and third and combine them using XOR
+      // and bit shifting:
+
+      return std::hash<long>()(k.unscaled());
+    }
+  };
+}
 
 #endif
