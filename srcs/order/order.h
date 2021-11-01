@@ -74,7 +74,6 @@ namespace fep::srcs::order
       // TODO(): check if an order is a valid order.
       return true;
     }
-
     void set_quantity(const int32_t quantity)
     {
       this->quantity_ = quantity;
