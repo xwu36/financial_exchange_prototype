@@ -12,6 +12,7 @@ cc_library(
         "//srcs/order:order_book",
         "//srcs/order:order_pool",
         "//srcs/order:order",
+        "//srcs/stock:instrument_symbol",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
         "@glog",

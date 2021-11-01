@@ -11,6 +11,7 @@ namespace fep::srcs::order
   {
 
     using ::fep::lib::Price4;
+    using ::fep::srcs::stock::Symbol;
     using ::nlohmann::json;
 
     TEST(OrderPoolTest, GetOrder)
@@ -45,6 +46,7 @@ namespace fep::srcs::order
     {
       json order1_json = {
           {"order_id", 1},
+          {"symbol", "AAPL"},
           {
               "quantity",
               10,
@@ -52,6 +54,7 @@ namespace fep::srcs::order
           {"limit_price", "1.1"}};
       json order2_json = {
           {"order_id", 2},
+          {"symbol", "AAPL"},
           {
               "quantity",
               20,
@@ -59,6 +62,7 @@ namespace fep::srcs::order
           {"limit_price", "2.2"}};
       json order3_json = {
           {"order_id", 3},
+          {"symbol", "AAPL"},
           {
               "quantity",
               30,
@@ -69,17 +73,17 @@ namespace fep::srcs::order
       std::unique_ptr<Order> order3 = std::make_unique<Order>(order3_json);
 
       OrderPool pool;
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 0);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 0);
       EXPECT_TRUE(pool.AddOrder(std::move(order1)));
       EXPECT_TRUE(pool.AddOrder(std::move(order2)));
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 10);
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("2.2")), 20);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("2.2")), 20);
       EXPECT_TRUE(pool.AddOrder(std::move(order3)));
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 40);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 40);
       EXPECT_TRUE(pool.RemoveOrder(3));
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 10);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
       EXPECT_TRUE(pool.ModifyOrder(1, -5));
-      EXPECT_EQ(pool.GetQuantityForPrice(Price4("1.1")), 5);
+      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 5);
     }
   } // namespace
 } // namespace fep::srcs::order

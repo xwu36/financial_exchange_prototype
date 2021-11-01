@@ -78,6 +78,7 @@ cc_library(
     hdrs = ["order_pool.h"],
     deps = [
         "//lib:price4",
+        "//srcs/stock:instrument_symbol",
         ":order",
     ]
 )

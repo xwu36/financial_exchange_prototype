@@ -6,6 +6,7 @@
 
 #include "lib/price4.h"
 #include "srcs/order/order.h"
+#include "srcs/stock/instrument_symbol.h"
 
 namespace fep::srcs::order
 {
@@ -21,7 +22,7 @@ namespace fep::srcs::order
       {
         return false;
       }
-      price_to_quantity_[order->price()] += order->quantity();
+      symbol_to_price_to_quantity_[order->symbol()][order->price()] += order->quantity();
       id_to_order_map_[order->order_id()].swap(order);
       return true;
     }
@@ -35,7 +36,8 @@ namespace fep::srcs::order
       {
         return false;
       }
-      price_to_quantity_[kv->second->price()] -= kv->second->quantity();
+      auto &order = *kv->second;
+      symbol_to_price_to_quantity_[order.symbol()][order.price()] -= order.quantity();
       id_to_order_map_.erase(order_id);
       return true;
     }
@@ -60,24 +62,32 @@ namespace fep::srcs::order
       {
         return false;
       }
-      kv->second->set_quantity(kv->second->quantity() + quantity_delta);
-      price_to_quantity_[kv->second->price()] += quantity_delta;
+      auto &order = *kv->second;
+      order.set_quantity(order.quantity() + quantity_delta);
+      symbol_to_price_to_quantity_[order.symbol()][order.price()] += quantity_delta;
       return true;
     }
 
-    int32_t GetQuantityForPrice(const fep::lib::Price4 &price) const
+    // Returns quantity for a given price and symbol.
+    int32_t GetQuantityForPrice(const fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const
     {
-      const auto &kv = price_to_quantity_.find(price);
-      if (kv == price_to_quantity_.end())
+      const auto &itr = symbol_to_price_to_quantity_.find(symbol);
+      if (itr == symbol_to_price_to_quantity_.end())
       {
         return 0;
       }
-      return kv->second;
+      const auto &quantity = itr->second.find(price);
+      if (quantity == itr->second.end())
+      {
+        return 0;
+      }
+      return quantity->second;
     }
 
   private:
     std::unordered_map<int64_t, std::unique_ptr<Order>> id_to_order_map_;
-    std::unordered_map<fep::lib::Price4, int32_t> price_to_quantity_;
+    // Stores a price to quantity map for each symbol.
+    std::unordered_map<fep::srcs::stock::Symbol, std::unordered_map<fep::lib::Price4, int32_t>> symbol_to_price_to_quantity_;
   };
 
 } // namespace fep::srcs::order

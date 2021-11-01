@@ -33,13 +33,15 @@ namespace fep::lib
     jtype["type"] = this->kType;
     
     json jbid;
+    jbid["bid"] = {};
     for(const auto& bid : this->bids) {
       jbid["bid"].push_back(bid.to_str());
     }
 
     json jask;
+    jask["ask"] = {};
     for(const auto& ask : this->asks) {
-      jbid["ask"].push_back(ask.to_str());
+      jask["ask"].push_back(ask.to_str());
     }
     joutput.push_back(jtype);
     joutput.push_back(jbid);
@@ -49,6 +51,9 @@ namespace fep::lib
   }
 
   std::string TradeMessage::to_str() const {
+    if(this->trade_results.empty()) {
+      return this->trade_update.to_str();
+    }
     std::vector<std::string> trade_results;
     for(const auto& result : this->trade_results) {
       trade_results.push_back(result.to_str());

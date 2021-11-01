@@ -12,18 +12,90 @@ namespace fep::srcs::matching_engine
     using ::fep::lib::TradeMessage;
     using ::fep::lib::TradeResult;
     using ::fep::srcs::order::Order;
+    using ::fep::srcs::order::OrderBook;
     using ::fep::srcs::order::OrderBookEntry;
     using ::fep::srcs::order::OrderPool;
     using ::fep::srcs::order::OrderSide;
+    using ::fep::srcs::order::OrderStatus;
+    using ::fep::srcs::stock::Symbol;
 
-    void UpdateTradeUpdateForSeenPrices(const OrderPool &order_pool, const std::set<Price4> &prices, std::vector<TradeAction> &trade_actions)
+    void UpdateTradeUpdateForSeenPrices(const Symbol symbol, const OrderPool &order_pool, const std::set<Price4> &prices,
+                                        std::vector<TradeAction> &trade_actions)
     {
       for (const auto &price : prices)
       {
-        const int32_t quantity = order_pool.GetQuantityForPrice(price);
+        const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
         trade_actions.push_back({TradeAction(price, quantity, (quantity == 0 ? fep::lib::kDeleteAction : fep::lib::kModifyAction))});
       }
     }
+
+    template <class T>
+    void MaybeUpdateInfoForNewOrder(OrderPool &order_pool, OrderBook<T> &order_book, std::unique_ptr<Order> order,
+                                    std::vector<TradeAction> &trade_actions)
+    {
+      if (order->quantity() != 0)
+      {
+        const Price4 price = order->price();
+        const int32_t order_id = order->order_id();
+        const int32_t timestamp_sec = order->timestamp_sec();
+        const Symbol symbol = order->symbol();
+        const int32_t pre_quantity = order_pool.GetQuantityForPrice(symbol, price);
+
+        order_book.AddEntry(OrderBookEntry{
+            .timestamp_sec = timestamp_sec,
+            .order_id = order_id,
+            .price = price});
+        order_pool.AddOrder(std::move(order));
+        const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
+        trade_actions.push_back({TradeAction(price, quantity, (pre_quantity == 0 ? fep::lib::kAddAction : fep::lib::kModifyAction))});
+      }
+    }
+
+    template <class T>
+    bool ProcessFirstOrderEntryAndContinue(const bool sell, const Order &first_order, Order &new_order, std::set<Price4> &prices_seen,
+                                           OrderPool &order_pool, OrderBook<T> &order_book, std::vector<TradeResult> &trade_results)
+    {
+      const bool is_offer_matched = sell ? first_order.price() >= new_order.price() : first_order.price() <= new_order.price();
+      if (!is_offer_matched)
+      {
+        return false;
+      }
+
+      prices_seen.insert(first_order.price());
+
+      if (first_order.quantity() > new_order.quantity())
+      {
+        trade_results.push_back({TradeResult(first_order.price(), new_order.quantity())});
+        order_pool.ModifyOrder(first_order.order_id(), -new_order.quantity());
+        new_order.set_quantity(0);
+        return false;
+      }
+
+      trade_results.push_back({TradeResult(first_order.price(), first_order.quantity())});
+      order_book.RemoveFirstEntry();
+      order_pool.RemoveOrder(first_order.order_id());
+      new_order.set_quantity(new_order.quantity() - first_order.quantity());
+      return true;
+    }
+  }
+
+  template <class T>
+  bool MaybeUpdateInfoWhenCancellingOrder(const int32_t order_id, OrderPool &order_pool, OrderBook<T> &order_book, std::vector<TradeAction> &trade_actions)
+  {
+    const auto *matched_order = order_pool.GetOrder(order_id);
+    if (matched_order == nullptr)
+    {
+      return false;
+    }
+
+    const int32_t timestamp_sec = matched_order->timestamp_sec();
+    const Price4 price = matched_order->price();
+    const Symbol symbol = matched_order->symbol();
+    order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price});
+    order_pool.RemoveOrder(order_id);
+    const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
+    trade_actions.push_back({TradeAction(price, quantity, (quantity == 0 ? fep::lib::kDeleteAction : fep::lib::kModifyAction))});
+    return true;
   }
 
   absl::StatusOr<TradeMessage> MatchingEngine::Process(std::unique_ptr<Order> order)
@@ -32,10 +104,20 @@ namespace fep::srcs::matching_engine
     {
       return absl::InvalidArgumentError("order is not valid.");
     }
-    if (order->side() == OrderSide::BUY) {
+    if (order->type() == OrderStatus::UNKNOWN)
+    {
+      return absl::InvalidArgumentError("not a NEW or CANCEL order");
+    }
+    if (order->type() == OrderStatus::CANCEL)
+    {
+      return Cancel(std::move(order));
+    }
+    if (order->side() == OrderSide::BUY)
+    {
       return Buy(std::move(order));
     }
-    if(order->side() == OrderSide::SELL) {
+    if (order->side() == OrderSide::SELL)
+    {
       return Sell(std::move(order));
     }
     return absl::InvalidArgumentError("");
@@ -45,48 +127,26 @@ namespace fep::srcs::matching_engine
   {
     TradeMessage trade_message;
     std::set<Price4> prices_seen;
-    while (!bid_order_book_.Empty() && order->quantity() != 0)
+    const Symbol symbol = order->symbol();
+    auto &bid_order_book = bid_order_books_[symbol];
+    while (!bid_order_book.Empty() && order->quantity() != 0)
     {
-      const auto &book_entry = bid_order_book_.FirstEntry();
-      const auto *first_order = order_pool_.GetOrder(book_entry.order_id);
+      const auto &book_entry = bid_order_book.FirstEntry();
+      const auto *first_order = bid_order_pool_.GetOrder(book_entry.order_id);
       if (first_order == nullptr)
       {
         return absl::NotFoundError("order_id not found in the order pool.");
       }
 
-      if (first_order->price() >= order->price())
-      {
-        prices_seen.insert(first_order->price());
-
-        if (first_order->quantity() > order->quantity())
-        {
-          trade_message.trade_results.push_back({TradeResult(first_order->price(), order->quantity())});
-          order_pool_.ModifyOrder(first_order->order_id(), -order->quantity());
-          break;
-        }
-
-        order->set_quantity(order->quantity() - first_order->quantity());
-
-        bid_order_book_.RemoveFirstEntry();
-        order_pool_.RemoveOrder(first_order->order_id());
-      }
-      else
+      if (!ProcessFirstOrderEntryAndContinue(/*sell=*/true, *first_order, *order, prices_seen, bid_order_pool_,
+                                             bid_order_book, trade_message.trade_results))
       {
         break;
       }
     }
 
-    if (order->quantity() != 0)
-    {
-      ask_order_book_.AddEntry(OrderBookEntry{
-          .timestamp_sec = order->timestamp_sec(),
-          .order_id = order->order_id(),
-          .price = order->price()});
-      trade_message.trade_update.asks.push_back({TradeAction(order->price(), order->quantity(), fep::lib::kAddAction)});
-      order_pool_.AddOrder(std::move(order));
-    }
-
-    UpdateTradeUpdateForSeenPrices(order_pool_, prices_seen, trade_message.trade_update.bids);
+    MaybeUpdateInfoForNewOrder(ask_order_pool_, ask_order_books_[symbol], std::move(order), trade_message.trade_update.asks);
+    UpdateTradeUpdateForSeenPrices(symbol, bid_order_pool_, prices_seen, trade_message.trade_update.bids);
 
     return trade_message;
   }
@@ -95,50 +155,40 @@ namespace fep::srcs::matching_engine
   {
     TradeMessage trade_message;
     std::set<Price4> prices_seen;
-    while (!ask_order_book_.Empty() && order->quantity() != 0)
+    const Symbol symbol = order->symbol();
+    auto &ask_order_book = ask_order_books_[symbol];
+    while (!ask_order_book.Empty() && order->quantity() != 0)
     {
-      const auto &book_entry = ask_order_book_.FirstEntry();
-      const auto *first_order = order_pool_.GetOrder(book_entry.order_id);
+      const auto &book_entry = ask_order_book.FirstEntry();
+      const auto *first_order = ask_order_pool_.GetOrder(book_entry.order_id);
       if (first_order == nullptr)
       {
         return absl::NotFoundError("order_id not found in the order pool.");
       }
 
-      if (first_order->price() <= order->price())
-      {
-        prices_seen.insert(first_order->price());
-
-        if (first_order->quantity() > order->quantity())
-        {
-          trade_message.trade_results.push_back({TradeResult(first_order->price(), order->quantity())});
-          order_pool_.ModifyOrder(first_order->order_id(), -order->quantity());
-          break;
-        }
-
-        order->set_quantity(order->quantity() - first_order->quantity());
-
-        ask_order_book_.RemoveFirstEntry();
-        order_pool_.RemoveOrder(first_order->order_id());
-      }
-      else
+      if (!ProcessFirstOrderEntryAndContinue(/*sell=*/false, *first_order, *order, prices_seen,
+                                             ask_order_pool_, ask_order_book, trade_message.trade_results))
       {
         break;
       }
     }
 
-    if (order->quantity() != 0)
-    {
-      bid_order_book_.AddEntry(OrderBookEntry{
-          .timestamp_sec = order->timestamp_sec(),
-          .order_id = order->order_id(),
-          .price = order->price()});
-      trade_message.trade_update.bids.push_back({TradeAction(order->price(), order->quantity(), fep::lib::kAddAction)});
-      order_pool_.AddOrder(std::move(order));
-    }
-
-    UpdateTradeUpdateForSeenPrices(order_pool_, prices_seen, trade_message.trade_update.asks);
+    MaybeUpdateInfoForNewOrder(bid_order_pool_, bid_order_books_[symbol], std::move(order), trade_message.trade_update.bids);
+    UpdateTradeUpdateForSeenPrices(symbol, ask_order_pool_, prices_seen, trade_message.trade_update.asks);
 
     return trade_message;
+  }
+
+  absl::StatusOr<TradeMessage> MatchingEngine::Cancel(std::unique_ptr<Order> order)
+  {
+    const int32_t order_id = order->order_id();
+    TradeMessage trade_message;
+    if (MaybeUpdateInfoWhenCancellingOrder(order_id, bid_order_pool_, bid_order_books_[order->symbol()], trade_message.trade_update.bids) ||
+        MaybeUpdateInfoWhenCancellingOrder(order_id, ask_order_pool_, ask_order_books_[order->symbol()], trade_message.trade_update.asks))
+    {
+      return trade_message;
+    }
+    return absl::NotFoundError(absl::StrCat("Failed to cancel order ", order_id));
   }
 
 } // namespace fep::srcs::matching_engine
