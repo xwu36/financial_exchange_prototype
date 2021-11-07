@@ -13,7 +13,7 @@ namespace fep::lib
   namespace
   {
 
-    const int kScale4 = 10000;
+    constexpr int kScale4 = 10000;
 
     bool valid_price(const std::string &str)
     {
@@ -44,6 +44,7 @@ namespace fep::lib
     if (valid_price(str))
     {
       unscaled_ = static_cast<long>(std::stof(str) * kScale4);
+      scaled_ = std::stod(str);
     }
     else
     {

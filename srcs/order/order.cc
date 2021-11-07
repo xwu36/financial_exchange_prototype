@@ -1,5 +1,6 @@
 #include "srcs/order/order.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -7,6 +8,9 @@
 namespace fep::srcs::order
 {
 
+  constexpr int kScale4 = 10000;
+
+  using ::fep::lib::Price4;
   using ::fep::srcs::stock::SymbolStringToEnum;
   using ::nlohmann::json;
 
@@ -74,13 +78,72 @@ namespace fep::srcs::order
 
     this->order_type_ = OrderType::LIMIT;
     const auto &order_type = data.find("order_type");
-    if (order_type != data.end())
+    if (order_type != data.end() && order_type.value() == "MARKET")
     {
-      if (order_type.value() == "MARKET")
-      {
-        this->order_type_ = OrderType::MARKET;
-      }
+      this->order_type_ = OrderType::MARKET;
     }
+  }
+
+  // TODO(): Add unit tests for this function.
+  absl::Status Order::is_valid_order(const fep::lib::TickSizeRule &tick_size_rule, const int32_t lot_size) const
+  {
+    if (this->timestamp_sec_ <= 0)
+    {
+      return absl::InvalidArgumentError("order has a bad timestamp");
+    }
+    if (this->order_id_ <= 0)
+    {
+      return absl::InvalidArgumentError("order has a bad order id");
+    }
+
+    if (this->type_ == OrderStatus::NEW)
+    {
+      if (this->symbol_ == fep::srcs::stock::Symbol::UNKNOWN)
+      {
+        return absl::InvalidArgumentError("order has unknown symbol");
+      }
+      if (this->side_ == OrderSide::UNKNOWN)
+      {
+        return absl::InvalidArgumentError("order has unknown side");
+      }
+      if (this->quantity_ <= 0)
+      {
+        return absl::InvalidArgumentError("order quantity is less than 0");
+      }
+      if (this->price_ <= fep::lib::Price4(0))
+      {
+        return absl::InvalidArgumentError("order price is less than 0");
+      }
+      if (this->order_type_ == OrderType::UNKNOWN)
+      {
+        return absl::InvalidArgumentError("order has unknown type");
+      }
+      if (this->quantity_ % lot_size != 0)
+      {
+        return absl::InvalidArgumentError("order quantity is not multiple of lot_size");
+      }
+      const auto &ticks = tick_size_rule.GetTicks();
+      const auto tick_itr = std::lower_bound(ticks.cbegin(), ticks.cend(), this->price_,
+                                             [](const fep::lib::Tick &lhs, const fep::lib::Price4 &price)
+                                             {
+                                               return lhs.from_price < price;
+                                             }) -
+                            1;
+      const double tick_size = tick_itr->tick_size;
+      const double num_ticks = this->price_.scaled() / tick_size;
+      if (num_ticks != (int)num_ticks)
+      {
+        return absl::InvalidArgumentError("order price doesn't meet tick_size");
+      }
+      return absl::OkStatus();
+    }
+
+    if (this->type_ == OrderStatus::CANCEL)
+    {
+      return absl::OkStatus();
+    }
+
+    return absl::InvalidArgumentError("order type unknown");
   }
 
 } // namespace fep::srcs::order

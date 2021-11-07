@@ -16,6 +16,7 @@ namespace fep::lib
     // Converts from string.
     explicit Price4(const std::string &str);
     long unscaled() const { return unscaled_; }
+    double scaled() const { return scaled_; }
 
     bool operator==(const Price4 &that) const
     {
@@ -47,6 +48,7 @@ namespace fep::lib
 
   private:
     long unscaled_ = 0;
+    double scaled_ = 0;
   };
 
 } // namespace fep::lib
@@ -56,7 +58,7 @@ namespace std
   template <>
   struct hash<fep::lib::Price4>
   {
-    std::size_t operator()(const fep::lib::Price4& k) const
+    std::size_t operator()(const fep::lib::Price4 &k) const
     {
       // Compute individual hash values for first,
       // second and third and combine them using XOR

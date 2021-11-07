@@ -4,7 +4,9 @@
 #include <cstdint>
 #include <string>
 
+#include "external/com_google_absl/absl/status/status.h"
 #include "lib/price4.h"
+#include "lib/tick_size_rule.h"
 #include "nlohmann/json.hpp"
 #include "srcs/stock/instrument_symbol.h"
 
@@ -69,15 +71,11 @@ namespace fep::srcs::order
     {
       return order_type_;
     }
-    bool is_valid_order() const
-    {
-      // TODO(): check if an order is a valid order.
-      return true;
-    }
     void set_quantity(const int32_t quantity)
     {
       this->quantity_ = quantity;
     }
+    absl::Status is_valid_order(const fep::lib::TickSizeRule &tick_size_rule, const int32_t lot_size) const;
 
   private:
     int64_t timestamp_sec_ = 0;

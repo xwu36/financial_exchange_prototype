@@ -8,8 +8,10 @@ cc_library(
     srcs = ["order.cc"],
     deps = [
         "//lib:price4",
+        "//lib:tick_size_rule",
         "//srcs/stock:instrument_symbol",
         "@com_github_nlohmann_json//:json",
+        "@com_google_absl//absl/status",
     ],
 )
 

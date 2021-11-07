@@ -41,3 +41,22 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "tick_size_rule",
+    hdrs = ["tick_size_rule.h"],
+    srcs = ["tick_size_rule.cc"],
+    deps = [
+        ":price4",
+        "@com_github_nlohmann_json//:json",
+    ],
+)
+
+cc_test(
+    name = "tick_size_rule_test",
+    srcs = ["tick_size_rule_test.cc"],
+    deps = [
+        ":tick_size_rule",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
