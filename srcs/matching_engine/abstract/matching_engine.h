@@ -1,5 +1,5 @@
-#ifndef SRCS_MATCHING_ENGINE_MATCHING_ENGINE_H_
-#define SRCS_MATCHING_ENGINE_MATCHING_ENGINE_H_
+#ifndef SRCS_MATCHING_ENGINE_ABSTRACT_MATCHING_ENGINE_H_
+#define SRCS_MATCHING_ENGINE_ABSTRACT_MATCHING_ENGINE_H_
 
 #include <unordered_map>
 #include <vector>
@@ -18,12 +18,13 @@ namespace fep::srcs::matching_engine
   {
   public:
     MatchingEngine() = default;
-    absl::StatusOr<fep::lib::TradeMessage> Process(std::unique_ptr<fep::srcs::order::Order> order);
+    virtual ~MatchingEngine() = default;
+    virtual absl::StatusOr<fep::lib::TradeMessage> Process(std::unique_ptr<fep::srcs::order::Order> order) = 0;
 
-  private:
-    absl::StatusOr<fep::lib::TradeMessage> Sell(std::unique_ptr<fep::srcs::order::Order> order);
-    absl::StatusOr<fep::lib::TradeMessage> Buy(std::unique_ptr<fep::srcs::order::Order> order);
-    absl::StatusOr<fep::lib::TradeMessage> Cancel(std::unique_ptr<fep::srcs::order::Order> order);
+  protected:
+    virtual absl::StatusOr<fep::lib::TradeMessage> Sell(std::unique_ptr<fep::srcs::order::Order> order) = 0;
+    virtual absl::StatusOr<fep::lib::TradeMessage> Buy(std::unique_ptr<fep::srcs::order::Order> order) = 0;
+    virtual absl::StatusOr<fep::lib::TradeMessage> Cancel(std::unique_ptr<fep::srcs::order::Order> order) = 0;
 
     fep::srcs::order::OrderPool bid_order_pool_;
     fep::srcs::order::OrderPool ask_order_pool_;

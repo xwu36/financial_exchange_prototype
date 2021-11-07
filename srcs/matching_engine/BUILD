@@ -3,12 +3,13 @@ load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 package(default_visibility = ["//srcs:__subpackages__"])
 
 cc_library(
-    name = "matching_engine",
-    srcs = ["matching_engine.cc"],
-    hdrs = ["matching_engine.h"],
+    name = "matching_engine_impl",
+    srcs = ["matching_engine_impl.cc"],
+    hdrs = ["matching_engine_impl.h"],
     deps = [
         "//lib:price4",
         "//lib:trade_message",
+        "//srcs/matching_engine/abstract:matching_engine",
         "//srcs/order:order_book",
         "//srcs/order:order_pool",
         "//srcs/order:order",
@@ -20,10 +21,10 @@ cc_library(
 )
 
 cc_test(
-    name = "matching_engine_test",
-    srcs = ["matching_engine_test.cc"],
+    name = "matching_engine_impl_test",
+    srcs = ["matching_engine_impl_test.cc"],
     deps = [
-        ":matching_engine",
+        ":matching_engine_impl",
         "//srcs/order:order",
         "//srcs/order:order_book_entry",
         "@com_google_googletest//:gtest_main",

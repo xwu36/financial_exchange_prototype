@@ -8,7 +8,8 @@
 
 namespace fep::lib
 {
-  struct Tick {
+  struct Tick
+  {
     fep::lib::Price4 from_price;
     fep::lib::Price4 to_price;
     double tick_size = 0;
@@ -19,7 +20,8 @@ namespace fep::lib
   public:
     TickSizeRule() = default;
     bool FromJson(const nlohmann::json &data);
-    const std::vector<Tick>& GetTicks() const {
+    const std::vector<Tick> &GetTicks() const
+    {
       return ticks;
     }
 

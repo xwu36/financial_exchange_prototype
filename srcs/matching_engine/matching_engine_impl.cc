@@ -1,4 +1,4 @@
-#include "srcs/matching_engine/matching_engine.h"
+#include "srcs/matching_engine/matching_engine_impl.h"
 
 #include "srcs/order/order.h"
 #include "srcs/order/order_book_entry.h"
@@ -98,12 +98,8 @@ namespace fep::srcs::matching_engine
     return true;
   }
 
-  absl::StatusOr<TradeMessage> MatchingEngine::Process(std::unique_ptr<Order> order)
+  absl::StatusOr<TradeMessage> MatchingEngineImpl::Process(std::unique_ptr<Order> order)
   {
-    if (order == nullptr || !order->is_valid_order())
-    {
-      return absl::InvalidArgumentError("order is not valid.");
-    }
     if (order->type() == OrderStatus::UNKNOWN)
     {
       return absl::InvalidArgumentError("not a NEW or CANCEL order");
@@ -120,10 +116,10 @@ namespace fep::srcs::matching_engine
     {
       return Sell(std::move(order));
     }
-    return absl::InvalidArgumentError("");
+    return absl::InvalidArgumentError("order cannot be processed");
   }
 
-  absl::StatusOr<TradeMessage> MatchingEngine::Sell(std::unique_ptr<Order> order)
+  absl::StatusOr<TradeMessage> MatchingEngineImpl::Sell(std::unique_ptr<Order> order)
   {
     TradeMessage trade_message;
     std::set<Price4> prices_seen;
@@ -151,7 +147,7 @@ namespace fep::srcs::matching_engine
     return trade_message;
   }
 
-  absl::StatusOr<TradeMessage> MatchingEngine::Buy(std::unique_ptr<Order> order)
+  absl::StatusOr<TradeMessage> MatchingEngineImpl::Buy(std::unique_ptr<Order> order)
   {
     TradeMessage trade_message;
     std::set<Price4> prices_seen;
@@ -179,7 +175,7 @@ namespace fep::srcs::matching_engine
     return trade_message;
   }
 
-  absl::StatusOr<TradeMessage> MatchingEngine::Cancel(std::unique_ptr<Order> order)
+  absl::StatusOr<TradeMessage> MatchingEngineImpl::Cancel(std::unique_ptr<Order> order)
   {
     const int32_t order_id = order->order_id();
     TradeMessage trade_message;
