@@ -31,3 +31,11 @@ cc_test(
         "@com_github_nlohmann_json//:json",
     ]
 )
+
+cc_library(
+    name = "matching_engine_factory",
+    hdrs = ["matching_engine_factory.h"],
+    deps = [
+        ":matching_engine_impl",
+    ],
+)
