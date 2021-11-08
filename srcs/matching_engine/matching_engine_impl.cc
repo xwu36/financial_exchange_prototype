@@ -100,6 +100,11 @@ namespace fep::srcs::matching_engine
 
   absl::StatusOr<TradeMessage> MatchingEngineImpl::Process(std::unique_ptr<Order> order)
   {
+    absl::Status valid_status = order->is_valid_order(tick_size_rule_, lot_size_);
+    if (!valid_status.ok())
+    {
+      return valid_status;
+    }
     if (order->type() == OrderStatus::UNKNOWN)
     {
       return absl::InvalidArgumentError("not a NEW or CANCEL order");

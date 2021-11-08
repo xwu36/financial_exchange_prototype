@@ -36,7 +36,6 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
     data = ["test_data/orders.jsonl"]
-
 )
 
 cc_library(

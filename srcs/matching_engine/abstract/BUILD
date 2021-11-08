@@ -7,6 +7,7 @@ cc_library(
     hdrs = ["matching_engine.h"],
     deps = [
         "//lib:price4",
+        "//lib:tick_size_rule",
         "//lib:trade_message",
         "//srcs/order:order_book",
         "//srcs/order:order_pool",

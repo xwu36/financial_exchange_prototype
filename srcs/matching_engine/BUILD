@@ -25,6 +25,7 @@ cc_test(
     srcs = ["matching_engine_impl_test.cc"],
     deps = [
         ":matching_engine_impl",
+        "//lib:tick_size_rule",
         "//srcs/order:order",
         "//srcs/order:order_book_entry",
         "@com_google_googletest//:gtest_main",
@@ -36,6 +37,7 @@ cc_library(
     name = "matching_engine_factory",
     hdrs = ["matching_engine_factory.h"],
     deps = [
+        "//lib:tick_size_rule",
         ":matching_engine_impl",
     ],
 )

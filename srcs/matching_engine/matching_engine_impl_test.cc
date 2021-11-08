@@ -7,12 +7,20 @@ namespace fep::srcs::matching_engine
 {
     namespace
     {
+        using ::fep::lib::TickSizeRule;
         using ::fep::srcs::order::Order;
         using ::nlohmann::json;
 
         TEST(MatchingEngineImplTest, SellOrder)
         {
-            MatchingEngineImpl engine;
+            json j = {
+                {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
+                {{"from_price", "1"}, {"tick_size", "0.01"}},
+            };
+            TickSizeRule rule;
+            EXPECT_TRUE(rule.FromJson(j));
+            
+            MatchingEngineImpl engine(rule, /*lot_size=*/10);
             const json data8 = {{"time", 10},
                                 {"type", "NEW"},
                                 {"order_id", 8},

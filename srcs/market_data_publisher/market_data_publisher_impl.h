@@ -1,8 +1,7 @@
 #ifndef SRCS_MARKET_DATA_PUBLISHER_MARKET_DATA_PUBLISHER_IMPL_H_
 #define SRCS_MARKET_DATA_PUBLISHER_MARKET_DATA_PUBLISHER_IMPL_H_
 
-#include <iostream>
-
+#include "glog/logging.h"
 #include "srcs/market_data_publisher/abstract/market_data_publisher.h"
 
 namespace fep::srcs::market_data_publisher
@@ -13,9 +12,9 @@ namespace fep::srcs::market_data_publisher
   public:
     MarketDataPublisherImpl() = default;
 
-    void Publish(const fep::lib::TradeMessage &message) override
+    void Publish(const fep::lib::TradeMessage &message) const override
     {
-      std::cout << message.to_str();
+      LOG(INFO) << message.to_str() << std::endl;
     }
   };
 

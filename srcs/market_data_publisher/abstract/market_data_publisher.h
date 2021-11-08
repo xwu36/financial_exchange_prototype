@@ -11,7 +11,7 @@ namespace fep::srcs::market_data_publisher
   public:
     MarketDataPublisher() = default;
     virtual ~MarketDataPublisher() = default;
-    virtual void Publish(const fep::lib::TradeMessage &message) = 0;
+    virtual void Publish(const fep::lib::TradeMessage &message) const = 0;
   };
 
 } // namespace fep::srcs::

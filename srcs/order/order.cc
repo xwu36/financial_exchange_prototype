@@ -9,6 +9,7 @@ namespace fep::srcs::order
 {
 
   constexpr int kScale4 = 10000;
+  constexpr double kPriceError = 1e-6;
 
   using ::fep::lib::Price4;
   using ::fep::srcs::stock::SymbolStringToEnum;
@@ -131,7 +132,7 @@ namespace fep::srcs::order
                             1;
       const double tick_size = tick_itr->tick_size;
       const double num_ticks = this->price_.scaled() / tick_size;
-      if (num_ticks != (int)num_ticks)
+      if (std::abs(num_ticks - std::round(num_ticks)) > kPriceError)
       {
         return absl::InvalidArgumentError("order price doesn't meet tick_size");
       }
