@@ -11,12 +11,14 @@ namespace fep::lib
     {
       const Price4 price("1234");
       EXPECT_EQ(price.unscaled(), 12340000);
+      EXPECT_DOUBLE_EQ(price.scaled(), 1234);
     }
 
     TEST(Price4Test, ParsedFromStringWithAPeriod)
     {
       const Price4 price("12.34");
       EXPECT_EQ(price.unscaled(), 123400);
+      EXPECT_DOUBLE_EQ(price.scaled(), 12.34);
     }
 
     TEST(Price4Test, ParsedFromStringFailedDueToTwoPeriods)
@@ -35,7 +37,8 @@ namespace fep::lib
     {
       const Price4 price(99000);
       EXPECT_EQ(price.unscaled(), 99000);
-      EXPECT_EQ(price.to_str(), "9.90");
+      EXPECT_DOUBLE_EQ(price.scaled(), 9.9);
+      EXPECT_EQ(price.to_str(), "9.9");
     }
 
     TEST(Price4Test, CompareOperators)

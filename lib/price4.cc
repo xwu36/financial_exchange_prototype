@@ -38,13 +38,15 @@ namespace fep::lib
 
   } // namespace
 
+  Price4::Price4(const long unscaled) : unscaled_(unscaled), scaled_(unscaled * 1.0 / kScale4), str_(absl::StrCat(scaled_)) {}
+
   Price4::Price4(const std::string &str)
   {
-    unscaled_ = 0;
     if (valid_price(str))
     {
-      unscaled_ = static_cast<long>(std::stof(str) * kScale4);
       scaled_ = std::stod(str);
+      unscaled_ = static_cast<long>(scaled_ * kScale4);
+      str_ = str;
     }
     else
     {
@@ -54,13 +56,7 @@ namespace fep::lib
 
   std::string Price4::to_str() const
   {
-    const long first_half = unscaled_ / kScale4;
-    const long second_half = unscaled_ / 100 - first_half * 100;
-    if (second_half < 10)
-    {
-      return absl::StrCat(first_half, ".", "0", second_half);
-    }
-    return absl::StrCat(first_half, ".", second_half);
+    return str_;
   }
 
 } // namespace fep::lib
