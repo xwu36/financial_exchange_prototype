@@ -19,7 +19,7 @@ namespace fep::srcs::matching_engine
             };
             TickSizeRule rule;
             EXPECT_TRUE(rule.FromJson(j));
-            
+
             MatchingEngineImpl engine(rule, /*lot_size=*/10);
             const json data8 = {{"time", 10},
                                 {"type", "NEW"},

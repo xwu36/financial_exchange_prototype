@@ -36,14 +36,17 @@ int main(int argc, char *argv[])
   TickSizeRule tick_size_rule;
   tick_size_rule.FromJson(tick_size_j);
 
+  // Create a matching_engine object.
   const MatchingEngineFactory matching_engine_factory(tick_size_rule, absl::GetFlag(FLAGS_lot_size));
-  const MarketDataPublisherFactory market_data_publiser_factory;
-
   MatchingEngineImpl matching_engine = matching_engine_factory.ProduceMatchingEngine();
+
+  // Create a market data publiser.
+  const MarketDataPublisherFactory market_data_publiser_factory;
   const MarketDataPublisherImpl market_data_publiser = market_data_publiser_factory.ProduceMarketDataPublisher();
 
   std::vector<Order> orders = fep::srcs::order::ReadOrdersFromPath("srcs/main/data/orders.jsonl");
 
+  // Loop through all the offers and process each of them.
   for (const auto &order : orders)
   {
     absl::StatusOr<TradeMessage> message = matching_engine.Process(std::make_unique<Order>(order));
