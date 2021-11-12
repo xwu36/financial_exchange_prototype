@@ -12,7 +12,7 @@ namespace fep::lib
   {
     fep::lib::Price4 from_price;
     fep::lib::Price4 to_price;
-    double tick_size = 0;
+    double tick_size = 0.0;
   };
 
   class TickSizeRule

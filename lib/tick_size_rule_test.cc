@@ -11,9 +11,9 @@ namespace fep::lib
   TEST(TickSizeRuleTest, CorrectInput)
   {
     json j = {
-        {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
-        {{"from_price", "3"}, {"tick_size", "1"}},
-        {{"from_price", "1"}, {"to_price", "3"}, {"tick_size", "0.01"}},
+        {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", 0.0001}},
+        {{"from_price", "3"}, {"tick_size", 1}},
+        {{"from_price", "1"}, {"to_price", "3"}, {"tick_size", 0.01}},
     };
     TickSizeRule rule;
     EXPECT_TRUE(rule.FromJson(j));
@@ -35,9 +35,9 @@ namespace fep::lib
   TEST(TickSizeRuleTest, NotConsecutiveIntervals)
   {
     json j = {
-        {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
-        {{"from_price", "3"}, {"tick_size", "1"}},
-        {{"from_price", "2"}, {"to_price", "3"}, {"tick_size", "0.01"}},
+        {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", 0.0001}},
+        {{"from_price", "3"}, {"tick_size", 1}},
+        {{"from_price", "2"}, {"to_price", "3"}, {"tick_size", 0.01}},
     };
     TickSizeRule rule;
     EXPECT_FALSE(rule.FromJson(j));
@@ -46,8 +46,8 @@ namespace fep::lib
   TEST(TickSizeRuleTest, FromPriceGreaterThanToPrice)
   {
     json j = {
-        {{"from_price", "2"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
-        {{"from_price", "3"}, {"tick_size", "1"}},
+        {{"from_price", "2"}, {"to_price", "1"}, {"tick_size", 0.0001}},
+        {{"from_price", "3"}, {"tick_size", 1}},
     };
     TickSizeRule rule;
     EXPECT_FALSE(rule.FromJson(j));

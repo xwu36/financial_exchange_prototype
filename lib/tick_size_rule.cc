@@ -18,17 +18,15 @@ namespace fep::lib
       {
         if (item.key() == "from_price")
         {
-          tick.from_price = Price4(std::string(item.value()));
+          tick.from_price = Price4(item.value().get<std::string>());
         }
-
         if (item.key() == "to_price")
         {
-          tick.to_price = Price4(std::string(item.value()));
+          tick.to_price = Price4(item.value().get<std::string>());
         }
-
         if (item.key() == "tick_size")
         {
-          tick.tick_size = std::stod(std::string(item.value()));
+          tick.tick_size = item.value().get<double>();
         }
       }
 
