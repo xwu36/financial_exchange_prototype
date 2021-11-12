@@ -86,7 +86,7 @@ namespace fep::srcs::order
     {
       this->quantity_ = quantity;
     }
-    absl::Status is_valid_order(const fep::lib::TickSizeRule &tick_size_rule, const int32_t lot_size) const;
+    absl::Status is_valid_order(const fep::lib::TickSizeRule &tick_size_rule, int32_t lot_size) const;
     TimeInForce time_in_force() const
     {
       return time_in_force_;

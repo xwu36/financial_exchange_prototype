@@ -20,18 +20,20 @@ namespace fep::srcs::order
 
     // Removes an order from the poll.
     // Returns false if the order_id is not present in the pool.
-    bool RemoveOrder(const int64_t order_id);
+    bool RemoveOrder(int64_t order_id);
 
     // Returns order detail for a given order_id.
     // Returns a nullptr if the order_id is not present in the pool.
-    const Order *GetOrder(const int64_t order_id);
+    const Order *GetOrder(int64_t order_id);
 
-    // Modifies the quantity of a given order.
-    bool ModifyOrder(const int64_t order_id, const int64_t quantity_delta);
+    // Modifies the quantity for a given order.
+    // Return false if the offer is not present in the pool
+    // or the quantity of the offer would become less than 0 after modification.
+    bool ModifyOrder(int64_t order_id, int64_t quantity_delta);
 
     // Returns quantity for a given price and symbol.
     // Returns 0 if there is no match.
-    int32_t GetQuantityForPrice(const fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const;
+    int32_t GetQuantityForPrice(fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const;
 
   private:
     std::unordered_map<int64_t, std::unique_ptr<Order>> id_to_order_map_;

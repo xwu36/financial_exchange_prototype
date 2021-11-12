@@ -35,7 +35,7 @@ namespace fep::srcs::order
     }
 
     const std::string symbol = GetValueForKey<std::string>(data, "symbol", /*default_value=*/"");
-    const auto &symbol_enum = SymbolStringToEnum.find(symbol);
+    const auto symbol_enum = SymbolStringToEnum.find(symbol);
     if (symbol_enum != SymbolStringToEnum.end())
     {
       this->symbol_ = symbol_enum->second;
@@ -111,7 +111,7 @@ namespace fep::srcs::order
       {
         return absl::InvalidArgumentError("order quantity is not multiple of lot_size");
       }
-      const auto &ticks = tick_size_rule.GetTicks();
+      const auto ticks = tick_size_rule.GetTicks();
       const auto tick_itr = std::lower_bound(ticks.cbegin(), ticks.cend(), this->price_,
                                              [](const fep::lib::Tick &lhs, const fep::lib::Price4 &price)
                                              {

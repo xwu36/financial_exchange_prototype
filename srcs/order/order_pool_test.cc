@@ -83,6 +83,7 @@ namespace fep::srcs::order
       EXPECT_TRUE(pool.RemoveOrder(3));
       EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
       EXPECT_TRUE(pool.ModifyOrder(1, -5));
+      EXPECT_FALSE(pool.ModifyOrder(1, -50));
       EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 5);
     }
   } // namespace

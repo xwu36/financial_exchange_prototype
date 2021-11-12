@@ -102,7 +102,7 @@ namespace fep::srcs::order
 
     TEST(OrderUtilsTest, PriceForGivenTicks)
     {
-      json j = {
+      const json j = {
           {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
           {{"from_price", "1"}, {"tick_size", "0.01"}},
       };
