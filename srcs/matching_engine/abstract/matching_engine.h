@@ -30,8 +30,8 @@ namespace fep::srcs::matching_engine
 
     fep::srcs::order::OrderPool bid_order_pool_;
     fep::srcs::order::OrderPool ask_order_pool_;
-    std::unordered_map<fep::srcs::stock::Symbol, fep::srcs::order::OrderBook<fep::srcs::order::BidComparator>> bid_order_books_;
-    std::unordered_map<fep::srcs::stock::Symbol, fep::srcs::order::OrderBook<fep::srcs::order::AskComparator>> ask_order_books_;
+    std::unordered_map<fep::srcs::stock::Symbol, fep::srcs::order::BidOrderBook> bid_order_books_;
+    std::unordered_map<fep::srcs::stock::Symbol, fep::srcs::order::AskOrderBook> ask_order_books_;
     const fep::lib::TickSizeRule tick_size_rule_;
     const uint32_t lot_size_;
   };

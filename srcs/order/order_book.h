@@ -45,6 +45,9 @@ namespace fep::srcs::order
   class OrderBook
   {
   public:
+    OrderBook() = default;
+    ~OrderBook() = default;
+
     const bool Empty()
     {
       return order_book_entries_.empty();
@@ -81,6 +84,18 @@ namespace fep::srcs::order
 
   private:
     std::set<OrderBookEntry, T> order_book_entries_;
+  };
+
+  class BidOrderBook : public OrderBook<BidComparator>
+  {
+  public:
+    BidOrderBook() = default;
+  };
+
+  class AskOrderBook : public OrderBook<AskComparator>
+  {
+  public:
+    AskOrderBook() = default;
   };
 
 } // namespace fep::srcs::order

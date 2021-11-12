@@ -26,7 +26,7 @@ namespace fep::srcs::order
 
     TEST_F(OrderBookTest, BidBook)
     {
-      OrderBook<BidComparator> bid_book;
+      BidOrderBook bid_book;
       bid_book.AddEntry(entry1_);
       EXPECT_EQ(bid_book.Size(), 1);
       EXPECT_EQ(bid_book.FirstEntry().order_id, 1);
@@ -65,7 +65,7 @@ namespace fep::srcs::order
 
     TEST_F(OrderBookTest, AskBook)
     {
-      OrderBook<AskComparator> ask_book;
+      AskOrderBook ask_book;
       ask_book.AddEntry(entry1_);
       EXPECT_EQ(ask_book.Size(), 1);
       EXPECT_EQ(ask_book.FirstEntry().order_id, 1);
