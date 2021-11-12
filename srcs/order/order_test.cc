@@ -52,112 +52,52 @@ namespace fep::srcs::order
       EXPECT_EQ(order.order_type(), OrderType::MARKET);
     }
 
-    TEST(OrderUtilsTest, BuySideFromJson)
+    TEST(OrderUtilsTest, SideFromJson)
     {
-      const json data = {{"time", 123},
-                         {"type", "NEW"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "BUY"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "MARKET"}};
-      const Order order(data);
+      const json data1 = {{"side", "BUY"}};
+      const Order order1(data1);
+      EXPECT_EQ(order1.side(), OrderSide::BUY);
 
-      EXPECT_EQ(order.side(), OrderSide::BUY);
+      const json data2 = {{"side", "SELL"}};
+      const Order order2(data2);
+      EXPECT_EQ(order2.side(), OrderSide::SELL);
     }
 
-    TEST(OrderUtilsTest, SellSideFromJson)
+    TEST(OrderUtilsTest, OrderTypeFromJson)
     {
-      const json data = {{"time", 123},
-                         {"type", "NEW"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "SELL"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "MARKET"}};
-      const Order order(data);
+      const json data1 = {{"order_type", "MARKET"}};
+      const Order order1(data1);
+      EXPECT_EQ(order1.order_type(), OrderType::MARKET);
 
-      EXPECT_EQ(order.side(), OrderSide::SELL);
+      const json data2 = {{"order_type", "LIMIT"}};
+      const Order order2(data2);
+      EXPECT_EQ(order2.order_type(), OrderType::LIMIT);
     }
 
-    TEST(OrderUtilsTest, MarketOrderFromJson)
+    TEST(OrderUtilsTest, OrderStatusFromJson)
     {
-      const json data = {{"time", 123},
-                         {"type", "NEW"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "BUY"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "MARKET"}};
-      const Order order(data);
+      const json data1 = {{"type", "NEW"}};
+      const Order order1(data1);
+      EXPECT_EQ(order1.type(), OrderStatus::NEW);
 
-      EXPECT_EQ(order.order_type(), OrderType::MARKET);
+      const json data2 = {{"type", "CANCEL"}};
+      const Order order2(data2);
+      EXPECT_EQ(order2.type(), OrderStatus::CANCEL);
     }
 
-    TEST(OrderUtilsTest, LimitOrderFromJson)
+    TEST(OrderUtilsTest, TimeInForce)
     {
-      const json data = {{"time", 123},
-                         {"type", "NEW"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "BUY"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "LIMIT"}};
-      const Order order(data);
+      const json data1 = {{"time_in_force", "DAY"}};
+      const Order order1(data1);
+      EXPECT_EQ(order1.time_in_force(), TimeInForce::DAY);
 
-      EXPECT_EQ(order.order_type(), OrderType::LIMIT);
-    }
+      const json data2 = {{"time_in_force", "IOC"}};
+      const Order order2(data2);
+      EXPECT_EQ(order2.time_in_force(), TimeInForce::IOC);
 
-    TEST(OrderUtilsTest, NewOrderFromJson)
-    {
-      const json data = {{"time", 123},
-                         {"type", "NEW"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "BUY"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "LIMIT"}};
-      const Order order(data);
-
-      EXPECT_EQ(order.type(), OrderStatus::NEW);
-    }
-
-    TEST(OrderUtilsTest, CanceledOrderFromJson)
-    {
-      const json data = {{"time", 123},
-                         {"type", "CANCEL"},
-                         {"order_id", 100134},
-                         {"symbol", "AAPL"},
-                         {"side", "BUY"},
-                         {
-                             "quantity",
-                             100,
-                         },
-                         {"limit_price", "140.30"},
-                         {"order_type", "LIMIT"}};
-      const Order order(data);
-
-      EXPECT_EQ(order.type(), OrderStatus::CANCEL);
+      const json data3 = {{"time_in_force", "GTC"}};
+      const Order order3(data3);
+      EXPECT_EQ(order3.time_in_force(), TimeInForce::GTC);
     }
 
     TEST(OrderUtilsTest, PriceForGivenTicks)
@@ -178,8 +118,7 @@ namespace fep::srcs::order
                               "quantity",
                               100,
                           },
-                          {"limit_price", "1.234"},
-                          {"order_type", "LIMIT"}};
+                          {"limit_price", "1.234"}};
       const Order order1(data1);
 
       EXPECT_EQ(order1.is_valid_order(rule, /*lot_size=*/10), absl::InvalidArgumentError("order price doesn't meet tick_size"));
@@ -252,7 +191,7 @@ namespace fep::srcs::order
                           {"order_type", "LIMIT"}};
       const Order order1(data1);
 
-      EXPECT_EQ(order1.is_valid_order(rule, /*lot_size=*/10), absl::InvalidArgumentError("order price doesn't meet tick_size"));
+      EXPECT_TRUE(order1.is_valid_order(rule, /*lot_size=*/10).ok());
 
       const json data2 = {{"time", 123},
                           {"type", "NEW"},

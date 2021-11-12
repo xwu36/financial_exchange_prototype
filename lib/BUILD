@@ -60,3 +60,12 @@ cc_test(
         "@com_google_googletest//:gtest_main",
     ],
 )
+
+cc_library(
+    name = "json_parser",
+    hdrs = ["json_parser.h"],
+    deps = [
+        "@com_google_absl//absl/strings",
+        "@com_github_nlohmann_json//:json",
+    ],
+)

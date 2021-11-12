@@ -7,6 +7,7 @@ cc_library(
     hdrs = ["order.h"],
     srcs = ["order.cc"],
     deps = [
+        "//lib:json_parser",
         "//lib:price4",
         "//lib:tick_size_rule",
         "//srcs/stock:instrument_symbol",

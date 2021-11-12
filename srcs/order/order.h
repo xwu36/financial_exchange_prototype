@@ -34,6 +34,17 @@ namespace fep::srcs::order
     SELL
   };
 
+  enum class TimeInForce
+  {
+    UNKNOWN,
+    // A DAY order can rest in the order book if not immediately traded.
+    DAY,
+    // Immediate-or-cancel. An IOC order cannot rest in the order book.
+    IOC,
+    // Good-till-cancel. A GTC order is like a DAY order with one distinction.
+    GTC
+  };
+
   class Order
   {
   public:
@@ -63,7 +74,7 @@ namespace fep::srcs::order
     {
       return quantity_;
     }
-    fep::lib::Price4 price() const
+    const fep::lib::Price4 &price() const
     {
       return price_;
     }
@@ -76,6 +87,10 @@ namespace fep::srcs::order
       this->quantity_ = quantity;
     }
     absl::Status is_valid_order(const fep::lib::TickSizeRule &tick_size_rule, const int32_t lot_size) const;
+    TimeInForce time_in_force() const
+    {
+      return time_in_force_;
+    }
 
   private:
     int64_t timestamp_sec_ = 0;
@@ -86,6 +101,7 @@ namespace fep::srcs::order
     int32_t quantity_ = 0;
     fep::lib::Price4 price_;
     OrderType order_type_ = OrderType::UNKNOWN;
+    TimeInForce time_in_force_ = TimeInForce::UNKNOWN;
   };
 
 } // namespace fep::srcs::order

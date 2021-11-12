@@ -5,83 +5,71 @@
 #include <fstream>
 #include <string>
 
+#include "lib/json_parser.h"
+
 namespace fep::srcs::order
 {
-
   constexpr int kScale4 = 10000;
   constexpr double kPriceError = 1e-6;
 
+  using ::fep::lib::GetValueForKey;
   using ::fep::lib::Price4;
   using ::fep::srcs::stock::SymbolStringToEnum;
   using ::nlohmann::json;
 
   Order::Order(const json &data)
   {
-    const auto &time = data.find("time");
-    if (time != data.end())
+    this->timestamp_sec_ = GetValueForKey<int64_t>(data, "time", /*default_value=*/0);
+    this->order_id_ = GetValueForKey<int64_t>(data, "order_id", /*default_value=*/0);
+    this->quantity_ = GetValueForKey<int64_t>(data, "quantity", /*default_value=*/0);
+    this->price_ = Price4(GetValueForKey<std::string>(data, "limit_price", /*default_value=*/"0"));
+
+    const std::string type = GetValueForKey<std::string>(data, "type", /*default_value=*/"");
+    if (type == "NEW")
     {
-      time.value().get_to(this->timestamp_sec_);
+      this->type_ = OrderStatus::NEW;
+    }
+    else if (type == "CANCEL")
+    {
+      this->type_ = OrderStatus::CANCEL;
     }
 
-    const auto &type = data.find("type");
-    if (type != data.end())
+    const std::string symbol = GetValueForKey<std::string>(data, "symbol", /*default_value=*/"");
+    const auto &symbol_enum = SymbolStringToEnum.find(symbol);
+    if (symbol_enum != SymbolStringToEnum.end())
     {
-      if (type.value() == "NEW")
-      {
-        this->type_ = OrderStatus::NEW;
-      }
-      else if (type.value() == "CANCEL")
-      {
-        this->type_ = OrderStatus::CANCEL;
-      }
+      this->symbol_ = symbol_enum->second;
     }
 
-    const auto &order_id = data.find("order_id");
-    if (order_id != data.end())
+    const std::string side = GetValueForKey<std::string>(data, "side", /*default_value=*/"");
+    if (side == "BUY")
     {
-      order_id.value().get_to(this->order_id_);
+      this->side_ = OrderSide::BUY;
     }
-
-    const auto &symbol_str = data.find("symbol");
-    if (symbol_str != data.end())
+    else if (side == "SELL")
     {
-      const auto &symbol_enum = SymbolStringToEnum.find(symbol_str.value());
-      if (symbol_enum != SymbolStringToEnum.end())
-      {
-        this->symbol_ = symbol_enum->second;
-      }
-    }
-
-    const auto &side = data.find("side");
-    if (side != data.end())
-    {
-      if (side.value() == "BUY")
-      {
-        this->side_ = OrderSide::BUY;
-      }
-      else if (side.value() == "SELL")
-      {
-        this->side_ = OrderSide::SELL;
-      }
-    }
-
-    const auto &quantity = data.find("quantity");
-    if (quantity != data.end())
-    {
-      quantity.value().get_to(this->quantity_);
-    }
-
-    const auto &price = data.find("limit_price");
-    if (price != data.end())
-    {
-      this->price_ = fep::lib::Price4(std::string(price.value()));
+      this->side_ = OrderSide::SELL;
     }
 
     this->order_type_ = OrderType::LIMIT;
-    const auto &order_type = data.find("order_type");
-    if (order_type != data.end() && order_type.value() == "MARKET")
+    const std::string order_type = GetValueForKey<std::string>(data, "order_type", /*default_value=*/"");
+    if (order_type == "MARKET")
     {
       this->order_type_ = OrderType::MARKET;
+    }
+
+    const std::string time_in_force = GetValueForKey<std::string>(data, "time_in_force", /*default_value=*/"");
+    if (time_in_force == "DAY")
+    {
+      this->time_in_force_ = TimeInForce::DAY;
+    }
+    else if (time_in_force == "IOC")
+    {
+      this->time_in_force_ = TimeInForce::IOC;
+    }
+    else if (time_in_force == "GTC")
+    {
+      this->time_in_force_ = TimeInForce::GTC;
     }
   }
 
