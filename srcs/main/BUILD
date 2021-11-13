@@ -16,6 +16,7 @@ cc_binary(
       "@com_google_absl//absl/flags:flag",
       "@com_google_absl//absl/flags:parse",
       "@com_google_absl//absl/flags:usage",
+      "@com_google_absl//absl/time",
       "@com_github_gflags_gflags//:gflags",
       "@com_github_nlohmann_json//:json",
       "@glog",

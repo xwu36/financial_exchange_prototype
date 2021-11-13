@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <vector>
 
 #include "absl/flags/flag.h"
+#include "absl/time/time.h"
 #include "external/com_google_absl/absl/status/statusor.h"
 #include "glog/logging.h"
 #include "glog/stl_logging.h"
@@ -23,14 +25,20 @@ using ::fep::srcs::matching_engine::MatchingEngineImpl;
 using ::fep::srcs::order::Order;
 using ::nlohmann::json;
 
+constexpr char kGtcOrdersFileName[] = "unmatched_gtc_orders.jsonl";
+
 ABSL_FLAG(uint32_t, lot_size, 100, "A lot size which shares must be a multiple of ");
+ABSL_FLAG(std::string, tick_size_rule_path, "srcs/main/data/tick_size_rule.json", "Path which stores tick_size_rule");
+ABSL_FLAG(std::string, order_file_path_prefix, "srcs/main/data/", "Directory which holds the order files");
+ABSL_FLAG(std::string, order_file_debug_path, "srcs/main/data/orders.jsonl",
+          "Input order path for debugging purpose");
 
 int main(int argc, char *argv[])
 {
   // google::InitGoogleLogging(argv[0]);
 
   // Read tick_size rule from a file.
-  std::ifstream tick_size_f("srcs/main/data/tick_size_rule.json");
+  std::ifstream tick_size_f(absl::GetFlag(FLAGS_tick_size_rule_path));
   json tick_size_j;
   tick_size_f >> tick_size_j;
   TickSizeRule tick_size_rule;
@@ -44,8 +52,28 @@ int main(int argc, char *argv[])
   const MarketDataPublisherFactory market_data_publiser_factory;
   const MarketDataPublisherImpl market_data_publiser = market_data_publiser_factory.ProduceMarketDataPublisher();
 
-  std::vector<Order> orders = fep::srcs::order::ReadOrdersFromPath("srcs/main/data/orders.jsonl");
+  absl::TimeZone utc = absl::UTCTimeZone();
+  const std::string now_str = absl::FormatTime("%Y-%m-%d/", absl::Now(), utc);
+  const std::string one_day_ago_str = absl::FormatTime("%Y-%m-%d/", absl::Now() - absl::Hours(24), utc);
+  const std::string order_file_path_prefix = absl::GetFlag(FLAGS_order_file_path_prefix);
+  const std::string orders_to_process_today = absl::StrCat(order_file_path_prefix, now_str, "orders.jsonl");
+  const std::string gtc_orders_today = absl::StrCat(
+      order_file_path_prefix, now_str, kGtcOrdersFileName);
+  const std::string gtc_orders_a_day_ago = absl::StrCat(
+      order_file_path_prefix, one_day_ago_str, kGtcOrdersFileName);
+  LOG(INFO) << "The path of all offers to be processed today: " << orders_to_process_today;
+  LOG(INFO) << "The path of unmatched GTC offers for today: " << gtc_orders_today;
+  LOG(INFO) << "The path of unmatched GTC offers from yesterday: " << gtc_orders_a_day_ago;
 
+  // Read yesterday's unmatched GTC orders.
+  absl::Status init_stats = matching_engine.InitOnMarketStarts(gtc_orders_a_day_ago);
+  if (!init_stats.ok())
+  {
+    LOG(ERROR) << init_stats.message();
+  }
+
+  // Process today's orders.
+  std::vector<Order> orders = fep::srcs::order::ReadOrdersFromPath(absl::GetFlag(FLAGS_order_file_debug_path));
   // Loop through all the offers and process each of them.
   for (const auto &order : orders)
   {
@@ -59,4 +87,7 @@ int main(int argc, char *argv[])
       LOG(ERROR) << message.value().to_str() << std::endl;
     }
   }
+
+  // Clear the matching engine and output today's unmatched GTC orders.
+  absl::Status clear_status = matching_engine.ClearOnMarketEnds(gtc_orders_today);
 }
