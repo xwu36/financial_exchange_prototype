@@ -17,7 +17,8 @@ namespace fep::srcs::order
   {
     UNKNOWN,
     MARKET,
-    LIMIT
+    LIMIT,
+    ICEBERG,
   };
 
   enum class OrderStatus

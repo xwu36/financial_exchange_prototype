@@ -11,6 +11,26 @@ namespace fep::srcs::order
 {
   constexpr int kScale4 = 10000;
   constexpr double kPriceError = 1e-6;
+  constexpr char kTime[] = "time";
+  constexpr char kTimestampSec[] = "timestamp_sec";
+  constexpr char kOrderId[] = "order_id";
+  constexpr char kQuantity[] = "quantity";
+  constexpr char kLimitPrice[] = "limit_price";
+  constexpr char kSymbol[] = "symbol";
+  constexpr char kType[] = "type";
+  constexpr char kSide[] = "side";
+  constexpr char kOrderType[] = "order_type";
+  constexpr char kTimeInForce[] = "time_in_force";
+  constexpr char kNew[] = "NEW";
+  constexpr char kCancel[] = "CANCEL";
+  constexpr char kBuy[] = "BUY";
+  constexpr char kSell[] = "SELL";
+  constexpr char kMarket[] = "MARKET";
+  constexpr char kLimit[] = "LIMIT";
+  constexpr char kIceberg[] = "ICEBERG";
+  constexpr char kDay[] = "DAY";
+  constexpr char kIoc[] = "IOC";
+  constexpr char kGtc[] = "GTC";
 
   using ::fep::lib::GetValueForKey;
   using ::fep::lib::Price4;
@@ -20,12 +40,12 @@ namespace fep::srcs::order
 
   Order::Order(const json &data)
   {
-    this->timestamp_sec_ = GetValueForKey<int64_t>(data, "time", /*default_value=*/0);
-    this->order_id_ = GetValueForKey<int64_t>(data, "order_id", /*default_value=*/0);
-    this->quantity_ = GetValueForKey<int32_t>(data, "quantity", /*default_value=*/0);
-    this->price_ = Price4(GetValueForKey<std::string>(data, "limit_price", /*default_value=*/"0"));
+    this->timestamp_sec_ = GetValueForKey<int64_t>(data, kTime, /*default_value=*/0);
+    this->order_id_ = GetValueForKey<int64_t>(data, kOrderId, /*default_value=*/0);
+    this->quantity_ = GetValueForKey<int32_t>(data, kQuantity, /*default_value=*/0);
+    this->price_ = Price4(GetValueForKey<std::string>(data, kLimitPrice, /*default_value=*/"0"));
 
-    const std::string type = GetValueForKey<std::string>(data, "type", /*default_value=*/"");
+    const std::string type = GetValueForKey<std::string>(data, kType, /*default_value=*/"");
     if (type == "NEW")
     {
       this->type_ = OrderStatus::NEW;
@@ -35,40 +55,40 @@ namespace fep::srcs::order
       this->type_ = OrderStatus::CANCEL;
     }
 
-    const std::string symbol = GetValueForKey<std::string>(data, "symbol", /*default_value=*/"");
+    const std::string symbol = GetValueForKey<std::string>(data, kSymbol, /*default_value=*/"");
     const auto symbol_enum = SymbolStringToEnum.find(symbol);
     if (symbol_enum != SymbolStringToEnum.end())
     {
       this->symbol_ = symbol_enum->second;
     }
 
-    const std::string side = GetValueForKey<std::string>(data, "side", /*default_value=*/"");
-    if (side == "BUY")
+    const std::string side = GetValueForKey<std::string>(data, kSide, /*default_value=*/"");
+    if (side == kBuy)
     {
       this->side_ = OrderSide::BUY;
     }
-    else if (side == "SELL")
+    else if (side == kSell)
     {
       this->side_ = OrderSide::SELL;
     }
 
     this->order_type_ = OrderType::LIMIT;
-    const std::string order_type = GetValueForKey<std::string>(data, "order_type", /*default_value=*/"");
-    if (order_type == "MARKET")
+    const std::string order_type = GetValueForKey<std::string>(data, kOrderType, /*default_value=*/"");
+    if (order_type == kMarket)
     {
       this->order_type_ = OrderType::MARKET;
     }
 
-    const std::string time_in_force = GetValueForKey<std::string>(data, "time_in_force", /*default_value=*/"");
-    if (time_in_force == "DAY")
+    const std::string time_in_force = GetValueForKey<std::string>(data, kTimeInForce, /*default_value=*/"");
+    if (time_in_force == kDay)
     {
       this->time_in_force_ = TimeInForce::DAY;
     }
-    else if (time_in_force == "IOC" || order_type == "MARKET")
+    else if (time_in_force == kIoc || order_type == kMarket)
     {
       this->time_in_force_ = TimeInForce::IOC;
     }
-    else if (time_in_force == "GTC")
+    else if (time_in_force == kGtc)
     {
       this->time_in_force_ = TimeInForce::GTC;
     }
@@ -77,58 +97,66 @@ namespace fep::srcs::order
   json Order::to_json() const
   {
     json j;
-    j["timestamp_sec"] = this->timestamp_sec_;
+    j[kTimestampSec] = this->timestamp_sec_;
+
     switch (this->type_)
     {
     case OrderStatus::NEW:
-      j["type"] = "NEW";
+      j[kType] = kNew;
       break;
     case OrderStatus::CANCEL:
-      j["type"] = "CANCEL";
+      j[kType] = kCancel;
       break;
     default:
       break;
     }
-    j["order_id"] = this->order_id_;
+
+    j[kOrderId] = this->order_id_;
     const auto symbol = SymbolEnumToString.find(this->symbol_);
     if (symbol != SymbolEnumToString.end())
     {
-      j["symbol"] = symbol->second;
+      j[kSymbol] = symbol->second;
     }
+
     switch (this->side_)
     {
     case OrderSide::BUY:
-      j["side"] = "BUY";
+      j[kSide] = kBuy;
       break;
     case OrderSide::SELL:
-      j["side"] = "SELL";
+      j[kSide] = kSell;
       break;
     default:
       break;
     }
-    j["quantity"] = this->quantity_;
-    j["limited_price"] = this->price_.to_str();
+
+    j[kQuantity] = this->quantity_;
+    j[kLimitPrice] = this->price_.to_str();
+
     switch (this->order_type_)
     {
     case OrderType::MARKET:
-      j["order_type"] = "MARKET";
+      j[kOrderType] = kMarket;
       break;
     case OrderType::LIMIT:
-      j["order_type"] = "LIMIT";
+      j[kOrderType] = kLimit;
       break;
+    case OrderType::ICEBERG:
+      j[kOrderType] = kIceberg;
     default:
       break;
     }
+
     switch (this->time_in_force_)
     {
     case TimeInForce::DAY:
-      j["time_in_force"] = "DAY";
+      j[kTimeInForce] = kDay;
       break;
     case TimeInForce::IOC:
-      j["time_in_force"] = "IOC";
+      j[kTimeInForce] = kIoc;
       break;
     case TimeInForce::GTC:
-      j["time_in_force"] = "GTC";
+      j[kTimeInForce] = kGtc;
       break;
     default:
       break;

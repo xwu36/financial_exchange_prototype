@@ -26,7 +26,7 @@ namespace fep::srcs::order
       EXPECT_EQ(order.price(), fep::lib::Price4(0));
       EXPECT_EQ(order.order_type(), OrderType::LIMIT);
       json jorder = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order.to_json(), jorder);
     }
 
@@ -55,7 +55,7 @@ namespace fep::srcs::order
       EXPECT_EQ(order.order_type(), OrderType::MARKET);
       EXPECT_EQ(order.time_in_force(), TimeInForce::IOC);
       json jorder = {
-          {"limited_price", "140.30"}, {"order_id", 100134}, {"order_type", "MARKET"}, {"quantity", 100}, {"side", "BUY"}, {"symbol", "AAPL"}, {"time_in_force", "IOC"}, {"timestamp_sec", 123}, {"type", "NEW"}};
+          {"limit_price", "140.30"}, {"order_id", 100134}, {"order_type", "MARKET"}, {"quantity", 100}, {"side", "BUY"}, {"symbol", "AAPL"}, {"time_in_force", "IOC"}, {"timestamp_sec", 123}, {"type", "NEW"}};
       EXPECT_EQ(order.to_json(), jorder);
     }
 
@@ -65,14 +65,14 @@ namespace fep::srcs::order
       const Order order1(data1);
       EXPECT_EQ(order1.side(), OrderSide::BUY);
       json jorder1 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"side", "BUY"}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"side", "BUY"}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order1.to_json(), jorder1);
 
       const json data2 = {{"side", "SELL"}};
       const Order order2(data2);
       EXPECT_EQ(order2.side(), OrderSide::SELL);
       json jorder2 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"side", "SELL"}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"side", "SELL"}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order2.to_json(), jorder2);
     }
 
@@ -82,14 +82,14 @@ namespace fep::srcs::order
       const Order order1(data1);
       EXPECT_EQ(order1.order_type(), OrderType::MARKET);
       json jorder1 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "MARKET"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "IOC"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "MARKET"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "IOC"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order1.to_json(), jorder1);
 
       const json data2 = {{"order_type", "LIMIT"}};
       const Order order2(data2);
       EXPECT_EQ(order2.order_type(), OrderType::LIMIT);
       json jorder2 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order2.to_json(), jorder2);
     }
 
@@ -99,14 +99,14 @@ namespace fep::srcs::order
       const Order order1(data1);
       EXPECT_EQ(order1.type(), OrderStatus::NEW);
       json jorder1 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"type", "NEW"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"type", "NEW"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order1.to_json(), jorder1);
 
       const json data2 = {{"type", "CANCEL"}};
       const Order order2(data2);
       EXPECT_EQ(order2.type(), OrderStatus::CANCEL);
       json jorder2 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"type", "CANCEL"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"type", "CANCEL"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order2.to_json(), jorder2);
     }
 
@@ -116,21 +116,21 @@ namespace fep::srcs::order
       const Order order1(data1);
       EXPECT_EQ(order1.time_in_force(), TimeInForce::DAY);
       json jorder1 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "DAY"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "DAY"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order1.to_json(), jorder1);
 
       const json data2 = {{"time_in_force", "IOC"}};
       const Order order2(data2);
       EXPECT_EQ(order2.time_in_force(), TimeInForce::IOC);
       json jorder2 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "IOC"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "IOC"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order2.to_json(), jorder2);
 
       const json data3 = {{"time_in_force", "GTC"}};
       const Order order3(data3);
       EXPECT_EQ(order3.time_in_force(), TimeInForce::GTC);
       json jorder3 = {
-          {"limited_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "GTC"}, {"timestamp_sec", 0}};
+          {"limit_price", "0"}, {"order_id", 0}, {"order_type", "LIMIT"}, {"quantity", 0}, {"symbol", "UNKNOWN"}, {"time_in_force", "GTC"}, {"timestamp_sec", 0}};
       EXPECT_EQ(order3.to_json(), jorder3);
     }
 

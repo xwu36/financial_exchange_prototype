@@ -12,6 +12,7 @@ namespace fep::srcs::order
     int64_t timestamp_sec = 0;
     int64_t order_id = 0;
     fep::lib::Price4 price;
+    bool visible = true;
   };
 
 } // namespace fep::srcs::order
