@@ -111,5 +111,20 @@ namespace fep::srcs::order
       EXPECT_TRUE(ask_book.Empty());
     }
 
+    TEST_F(OrderBookTest, VisibleQueue)
+    {
+      OrderBookEntry entry1{.timestamp_sec = 40, .order_id = 2, .price = Price4(1), .visible = true};
+      OrderBookEntry entry2{.timestamp_sec = 50, .order_id = 1, .price = Price4(1), .visible = false};
+      AskOrderBook ask_book;
+      ask_book.AddEntry(entry1);
+      ask_book.AddEntry(entry2);
+      EXPECT_EQ(ask_book.FirstEntry().order_id, 2);
+
+      BidOrderBook bid_book;
+      bid_book.AddEntry(entry1);
+      bid_book.AddEntry(entry2);
+      EXPECT_EQ(bid_book.FirstEntry().order_id, 2);
+    }
+
   } // namespace
 } // namespace fep::srcs::order

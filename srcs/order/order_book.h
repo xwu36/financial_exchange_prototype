@@ -12,15 +12,19 @@ namespace fep::srcs::order
     bool operator()(const OrderBookEntry &lhs, const OrderBookEntry &rhs)
         const
     {
-      if (lhs.price == rhs.price)
+      if (lhs.price != rhs.price)
       {
-        if (lhs.timestamp_sec == rhs.timestamp_sec)
-        {
-          return lhs.order_id < rhs.order_id;
-        }
+        return lhs.price > rhs.price;
+      }
+      if (lhs.visible != rhs.visible)
+      {
+        return lhs.visible > rhs.visible;
+      }
+      if (lhs.timestamp_sec != rhs.timestamp_sec)
+      {
         return lhs.timestamp_sec < rhs.timestamp_sec;
       }
-      return lhs.price > rhs.price;
+      return lhs.order_id < rhs.order_id;
     }
   };
 
@@ -29,15 +33,19 @@ namespace fep::srcs::order
     bool operator()(const OrderBookEntry &lhs, const OrderBookEntry &rhs)
         const
     {
-      if (lhs.price == rhs.price)
+      if (lhs.price != rhs.price)
       {
-        if (lhs.timestamp_sec == rhs.timestamp_sec)
-        {
-          return lhs.order_id < rhs.order_id;
-        }
+        return lhs.price < rhs.price;
+      }
+      if (lhs.visible != rhs.visible)
+      {
+        return lhs.visible > rhs.visible;
+      }
+      if (lhs.timestamp_sec != rhs.timestamp_sec)
+      {
         return lhs.timestamp_sec < rhs.timestamp_sec;
       }
-      return lhs.price < rhs.price;
+      return lhs.order_id < rhs.order_id;
     }
   };
 
