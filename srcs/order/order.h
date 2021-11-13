@@ -91,6 +91,7 @@ namespace fep::srcs::order
     {
       return time_in_force_;
     }
+    nlohmann::json to_json() const;
 
   private:
     int64_t timestamp_sec_ = 0;

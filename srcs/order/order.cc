@@ -14,6 +14,7 @@ namespace fep::srcs::order
 
   using ::fep::lib::GetValueForKey;
   using ::fep::lib::Price4;
+  using ::fep::srcs::stock::SymbolEnumToString;
   using ::fep::srcs::stock::SymbolStringToEnum;
   using ::nlohmann::json;
 
@@ -71,6 +72,68 @@ namespace fep::srcs::order
     {
       this->time_in_force_ = TimeInForce::GTC;
     }
+  }
+
+  json Order::to_json() const
+  {
+    json j;
+    j["timestamp_sec"] = this->timestamp_sec_;
+    switch (this->type_)
+    {
+    case OrderStatus::NEW:
+      j["type"] = "NEW";
+      break;
+    case OrderStatus::CANCEL:
+      j["type"] = "CANCEL";
+      break;
+    default:
+      break;
+    }
+    j["order_id"] = this->order_id_;
+    const auto symbol = SymbolEnumToString.find(this->symbol_);
+    if (symbol != SymbolEnumToString.end())
+    {
+      j["symbol"] = symbol->second;
+    }
+    switch (this->side_)
+    {
+    case OrderSide::BUY:
+      j["side"] = "BUY";
+      break;
+    case OrderSide::SELL:
+      j["side"] = "SELL";
+      break;
+    default:
+      break;
+    }
+    j["quantity"] = this->quantity_;
+    j["limited_price"] = this->price_.to_str();
+    switch (this->order_type_)
+    {
+    case OrderType::MARKET:
+      j["order_type"] = "MARKET";
+      break;
+    case OrderType::LIMIT:
+      j["order_type"] = "LIMIT";
+      break;
+    default:
+      break;
+    }
+    switch (this->time_in_force_)
+    {
+    case TimeInForce::DAY:
+      j["time_in_force"] = "DAY";
+      break;
+    case TimeInForce::IOC:
+      j["time_in_force"] = "IOC";
+      break;
+    case TimeInForce::GTC:
+      j["time_in_force"] = "GTC";
+      break;
+    default:
+      break;
+    }
+    return j;
   }
 
   // TODO(): Add unit tests for this function.
