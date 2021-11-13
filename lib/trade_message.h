@@ -31,9 +31,7 @@ namespace fep::lib
   class TradeAction
   {
   public:
-    TradeAction(const Price4 &price, uint64_t quantity, const std::string &action) : price_(price),
-                                                                                     quantity_(quantity),
-                                                                                     action_(action) {}
+    TradeAction(const Price4 &price, uint64_t quantity, const std::string &action) : price_(price), quantity_(quantity), action_(action) {}
     std::string to_str() const;
 
   protected:

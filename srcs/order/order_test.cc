@@ -50,6 +50,7 @@ namespace fep::srcs::order
       EXPECT_EQ(order.quantity(), 100);
       EXPECT_EQ(order.price(), fep::lib::Price4(1403000));
       EXPECT_EQ(order.order_type(), OrderType::MARKET);
+      EXPECT_EQ(order.time_in_force(), TimeInForce::IOC);
     }
 
     TEST(OrderUtilsTest, SideFromJson)
@@ -103,8 +104,8 @@ namespace fep::srcs::order
     TEST(OrderUtilsTest, PriceForGivenTicks)
     {
       const json j = {
-          {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
-          {{"from_price", "1"}, {"tick_size", "0.01"}},
+          {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", 0.0001}},
+          {{"from_price", "1"}, {"tick_size", 0.01}},
       };
       TickSizeRule rule;
       EXPECT_TRUE(rule.FromJson(j));
@@ -172,8 +173,8 @@ namespace fep::srcs::order
     TEST(OrderUtilsTest, LotSize)
     {
       json j = {
-          {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", "0.0001"}},
-          {{"from_price", "1"}, {"tick_size", "0.01"}},
+          {{"from_price", "0"}, {"to_price", "1"}, {"tick_size", 0.0001}},
+          {{"from_price", "1"}, {"tick_size", 0.01}},
       };
       TickSizeRule rule;
       EXPECT_TRUE(rule.FromJson(j));

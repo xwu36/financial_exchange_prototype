@@ -21,7 +21,7 @@ namespace fep::srcs::order
   {
     this->timestamp_sec_ = GetValueForKey<int64_t>(data, "time", /*default_value=*/0);
     this->order_id_ = GetValueForKey<int64_t>(data, "order_id", /*default_value=*/0);
-    this->quantity_ = GetValueForKey<int64_t>(data, "quantity", /*default_value=*/0);
+    this->quantity_ = GetValueForKey<int32_t>(data, "quantity", /*default_value=*/0);
     this->price_ = Price4(GetValueForKey<std::string>(data, "limit_price", /*default_value=*/"0"));
 
     const std::string type = GetValueForKey<std::string>(data, "type", /*default_value=*/"");
@@ -63,7 +63,7 @@ namespace fep::srcs::order
     {
       this->time_in_force_ = TimeInForce::DAY;
     }
-    else if (time_in_force == "IOC")
+    else if (time_in_force == "IOC" || order_type == "MARKET")
     {
       this->time_in_force_ = TimeInForce::IOC;
     }
@@ -99,7 +99,7 @@ namespace fep::srcs::order
       {
         return absl::InvalidArgumentError("order quantity is less than 0");
       }
-      if (this->price_ <= fep::lib::Price4(0))
+      if (this->order_type_ == OrderType::LIMIT && this->price_ <= fep::lib::Price4(0))
       {
         return absl::InvalidArgumentError("order price is less than 0");
       }
