@@ -83,6 +83,9 @@ cc_library(
         "//lib:price4",
         "//srcs/stock:instrument_symbol",
         ":order",
+        "@com_google_absl//absl/flags:flag",
+        "@com_google_absl//absl/flags:parse",
+        "@com_google_absl//absl/flags:usage",
     ]
 )
 

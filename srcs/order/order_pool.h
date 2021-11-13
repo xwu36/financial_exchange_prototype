@@ -27,18 +27,22 @@ namespace fep::srcs::order
     const Order *GetOrder(int64_t order_id);
 
     // Modifies the quantity for a given order.
-    // Return false if the offer is not present in the pool
-    // or the quantity of the offer would become less than 0 after modification.
-    bool ModifyOrder(int64_t order_id, int64_t quantity_delta);
+    bool ModifyOrder(int64_t order_id, int64_t quantity_delta, const bool is_visible_queue = true);
 
     // Returns quantity for a given price and symbol.
     // Returns 0 if there is no match.
     int32_t GetQuantityForPrice(fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const;
 
+    // Returns offer quantity in visible or hidden queue.
+    int32_t GetQuantityInQueue(int64_t order_id, bool is_visible_queue) const;
+
+    void IceberReplenish(const fep::srcs::order::Order &order_id);
+
   private:
     std::unordered_map<int64_t, std::unique_ptr<Order>> id_to_order_map_;
     // Stores a price to quantity map for each symbol.
-    std::unordered_map<fep::srcs::stock::Symbol, std::unordered_map<fep::lib::Price4, int32_t>> symbol_to_price_to_quantity_;
+    std::unordered_map<fep::srcs::stock::Symbol, std::unordered_map<fep::lib::Price4, int32_t>> symbol_to_price_to_visible_quantity_;
+    std::unordered_map<int64_t, int64_t> id_to_visible_quantity_;
   };
 
 } // namespace fep::srcs::order

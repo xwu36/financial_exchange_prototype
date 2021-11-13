@@ -52,6 +52,14 @@ namespace fep::srcs::matching_engine
             .timestamp_sec = timestamp_sec,
             .order_id = order_id,
             .price = price});
+        if (order->order_type() == OrderType::ICEBERG)
+        {
+          order_book.AddEntry(OrderBookEntry{
+              .timestamp_sec = timestamp_sec,
+              .order_id = order_id,
+              .price = price,
+              .visible = false});
+        }
         order_pool.AddOrder(std::move(order));
         const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
         trade_actions.push_back({TradeAction(price, quantity, (pre_quantity == 0 ? fep::lib::kAddAction : fep::lib::kModifyAction))});
@@ -59,7 +67,7 @@ namespace fep::srcs::matching_engine
     }
 
     template <class T>
-    bool ProcessFirstOrderEntryAndContinue(const bool sell, const Order &first_order, Order &new_order, std::set<Price4> &prices_seen, OrderPool &order_pool, OrderBook<T> &order_book, std::vector<TradeResult> &trade_results)
+    bool ProcessFirstOrderEntryAndContinue(const bool is_visible_queue, const bool sell, const Order &first_order, Order &new_order, std::set<Price4> &prices_seen, OrderPool &order_pool, OrderBook<T> &order_book, std::vector<TradeResult> &trade_results)
     {
       bool is_offer_matched = (new_order.order_type() == OrderType::MARKET);
       if (new_order.order_type() == OrderType::LIMIT)
@@ -71,20 +79,39 @@ namespace fep::srcs::matching_engine
         return false;
       }
 
-      prices_seen.insert(first_order.price());
-
-      if (first_order.quantity() > new_order.quantity())
+      if (is_visible_queue)
       {
-        trade_results.push_back({TradeResult(first_order.price(), new_order.quantity())});
-        order_pool.ModifyOrder(first_order.order_id(), -new_order.quantity());
+        prices_seen.insert(first_order.price());
+      }
+
+      const int32_t quantity_in_queue = order_pool.GetQuantityInQueue(first_order.order_id(), is_visible_queue);
+      if (quantity_in_queue > new_order.quantity())
+      {
+        if (is_visible_queue)
+        {
+          trade_results.push_back({TradeResult(first_order.price(), new_order.quantity())});
+        }
+        order_pool.ModifyOrder(first_order.order_id(), -new_order.quantity(), is_visible_queue);
         new_order.set_quantity(0);
         return false;
       }
 
-      trade_results.push_back({TradeResult(first_order.price(), first_order.quantity())});
+      if (is_visible_queue)
+      {
+        trade_results.push_back({TradeResult(first_order.price(), quantity_in_queue)});
+      }
+
       order_book.RemoveFirstEntry();
-      order_pool.RemoveOrder(first_order.order_id());
-      new_order.set_quantity(new_order.quantity() - first_order.quantity());
+      new_order.set_quantity(new_order.quantity() - quantity_in_queue);
+
+      order_pool.ModifyOrder(first_order.order_id(), -quantity_in_queue, is_visible_queue);
+      if (order_pool.GetQuantityInQueue(
+              first_order.order_id(), /*is_visible_queue=*/true) == 0 &&
+          order_pool.GetQuantityInQueue(
+              first_order.order_id(), /*is_visible_queue=*/false) == 0)
+      {
+        order_pool.RemoveOrder(first_order.order_id());
+      }
       return true;
     }
   }
@@ -101,7 +128,8 @@ namespace fep::srcs::matching_engine
     const TimestampSec timestamp_sec = matched_order->timestamp_sec();
     const Price4 price = matched_order->price();
     const Symbol symbol = matched_order->symbol();
-    order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price});
+    order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price, .visible = true});
+    order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price, .visible = false});
     order_pool.RemoveOrder(order_id);
     const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
     trade_actions.push_back({TradeAction(price, quantity, (quantity == 0 ? fep::lib::kDeleteAction : fep::lib::kModifyAction))});
@@ -149,7 +177,7 @@ namespace fep::srcs::matching_engine
         return absl::NotFoundError("order_id not found in the order pool.");
       }
 
-      if (!ProcessFirstOrderEntryAndContinue(/*sell=*/true, *first_order, *order, prices_seen, bid_order_pool_, bid_order_book, trade_message.trade_results))
+      if (!ProcessFirstOrderEntryAndContinue(book_entry.visible, /*sell=*/true, *first_order, *order, prices_seen, bid_order_pool_, bid_order_book, trade_message.trade_results))
       {
         break;
       }
@@ -176,7 +204,7 @@ namespace fep::srcs::matching_engine
         return absl::NotFoundError("order_id not found in the order pool.");
       }
 
-      if (!ProcessFirstOrderEntryAndContinue(/*sell=*/false, *first_order, *order, prices_seen, ask_order_pool_, ask_order_book, trade_message.trade_results))
+      if (!ProcessFirstOrderEntryAndContinue(book_entry.visible, /*sell=*/false, *first_order, *order, prices_seen, ask_order_pool_, ask_order_book, trade_message.trade_results))
       {
         break;
       }
