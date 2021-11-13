@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "external/com_google_absl/absl/status/status.h"
 #include "external/com_google_absl/absl/status/statusor.h"
 #include "lib/tick_size_rule.h"
 #include "lib/trade_message.h"
@@ -22,6 +23,8 @@ namespace fep::srcs::matching_engine
                    const uint32_t lot_size) : tick_size_rule_(tick_size_rule), lot_size_(lot_size) {}
     virtual ~MatchingEngine() = default;
     virtual absl::StatusOr<fep::lib::TradeMessage> Process(std::unique_ptr<fep::srcs::order::Order> order) = 0;
+    virtual absl::Status InitOnMarketStarts(const std::string &order_one_day_ago_path) = 0;
+    virtual absl::Status ClearOnMarketEnds(const std::string &state_path) = 0;
 
   protected:
     virtual absl::StatusOr<fep::lib::TradeMessage> Sell(std::unique_ptr<fep::srcs::order::Order> order) = 0;

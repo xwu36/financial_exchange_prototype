@@ -90,6 +90,12 @@ namespace fep::srcs::order
       order_book_entries_.emplace(order_entry);
     }
 
+    //TODO: add unit tests for this function.
+    void Clear()
+    {
+      order_book_entries_.clear();
+    }
+
   private:
     std::set<OrderBookEntry, T> order_book_entries_;
   };

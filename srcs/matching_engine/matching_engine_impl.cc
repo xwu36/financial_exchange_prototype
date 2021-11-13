@@ -1,7 +1,9 @@
 #include "srcs/matching_engine/matching_engine_impl.h"
 
+#include "glog/logging.h"
 #include "srcs/order/order.h"
 #include "srcs/order/order_book_entry.h"
+#include "srcs/order/order_utils.h"
 
 namespace fep::srcs::matching_engine
 {
@@ -28,7 +30,7 @@ namespace fep::srcs::matching_engine
     {
       for (const auto &price : prices)
       {
-        const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
+        const int32_t quantity = order_pool.GetVisibleQuantityForPrice(symbol, price);
         trade_actions.push_back({TradeAction(price, quantity, (quantity == 0 ? fep::lib::kDeleteAction : fep::lib::kModifyAction))});
       }
     }
@@ -40,13 +42,14 @@ namespace fep::srcs::matching_engine
       {
         return;
       }
+
       if (order->quantity() != 0)
       {
         const Price4 price = order->price();
         const OrderId order_id = order->order_id();
         const TimestampSec timestamp_sec = order->timestamp_sec();
         const Symbol symbol = order->symbol();
-        const int32_t pre_quantity = order_pool.GetQuantityForPrice(symbol, price);
+        const int32_t pre_quantity = order_pool.GetVisibleQuantityForPrice(symbol, price);
 
         order_book.AddEntry(OrderBookEntry{
             .timestamp_sec = timestamp_sec,
@@ -61,7 +64,7 @@ namespace fep::srcs::matching_engine
               .visible = false});
         }
         order_pool.AddOrder(std::move(order));
-        const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
+        const int32_t quantity = order_pool.GetVisibleQuantityForPrice(symbol, price);
         trade_actions.push_back({TradeAction(price, quantity, (pre_quantity == 0 ? fep::lib::kAddAction : fep::lib::kModifyAction))});
       }
     }
@@ -131,7 +134,7 @@ namespace fep::srcs::matching_engine
     order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price, .visible = true});
     order_book.RemoveEntry(OrderBookEntry{.timestamp_sec = timestamp_sec, .order_id = order_id, .price = price, .visible = false});
     order_pool.RemoveOrder(order_id);
-    const int32_t quantity = order_pool.GetQuantityForPrice(symbol, price);
+    const int32_t quantity = order_pool.GetVisibleQuantityForPrice(symbol, price);
     trade_actions.push_back({TradeAction(price, quantity, (quantity == 0 ? fep::lib::kDeleteAction : fep::lib::kModifyAction))});
     return true;
   }
@@ -226,6 +229,46 @@ namespace fep::srcs::matching_engine
       return trade_message;
     }
     return absl::NotFoundError(absl::StrCat("Failed to cancel order ", order_id));
+  }
+
+  // TODO: Add unit tests for this fucntion.
+  absl::Status MatchingEngineImpl::InitOnMarketStarts(const std::string &order_one_day_ago_path)
+  {
+    const std::vector<Order> orders = fep::srcs::order::ReadOrdersFromPath(order_one_day_ago_path);
+
+    // Loop through all the offers and process each of them.
+    for (const auto &order : orders)
+    {
+      absl::StatusOr<TradeMessage> message = Process(std::make_unique<Order>(order));
+      if (!message.ok())
+      {
+        return message.status();
+      }
+    }
+
+    return absl::OkStatus();
+  }
+
+  // TODO: Add unit tests for this funtion.
+  absl::Status MatchingEngineImpl::ClearOnMarketEnds(const std::string &state_path)
+  {
+    if (!bid_order_pool_.OutputGtcOrders(state_path) || !ask_order_pool_.OutputGtcOrders(state_path))
+    {
+      return absl::InvalidArgumentError(absl::StrCat("Failed to open ", state_path));
+    }
+
+    bid_order_pool_.ClearPool();
+    ask_order_pool_.ClearPool();
+    for (auto &kv : bid_order_books_)
+    {
+      kv.second.Clear();
+    }
+    for (auto &kv : ask_order_books_)
+    {
+      kv.second.Clear();
+    }
+
+    return absl::OkStatus();
   }
 
 } // namespace fep::srcs::matching_engine

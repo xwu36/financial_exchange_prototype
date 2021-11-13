@@ -1,5 +1,8 @@
 #include "srcs/order/order_pool.h"
 
+#include <fstream>
+#include <iostream>
+
 #include "absl/flags/flag.h"
 #include "absl/flags/parse.h"
 
@@ -68,6 +71,10 @@ namespace fep::srcs::order
     auto &order = *kv->second;
     const int64_t quantity_after = order.quantity() + quantity_delta;
     order.set_quantity(quantity_after);
+    if (GetQuantityInQueue(order_id, is_visible_queue) + quantity_delta < 0)
+    {
+      return false;
+    }
 
     if (is_visible_queue)
     {
@@ -82,7 +89,7 @@ namespace fep::srcs::order
     return true;
   }
 
-  int32_t OrderPool::GetQuantityForPrice(const Symbol symbol, const Price4 &price) const
+  int32_t OrderPool::GetVisibleQuantityForPrice(const Symbol symbol, const Price4 &price) const
   {
     const auto itr = symbol_to_price_to_visible_quantity_.find(symbol);
     if (itr == symbol_to_price_to_visible_quantity_.end())
@@ -97,7 +104,7 @@ namespace fep::srcs::order
     return quantity->second;
   }
 
-  // Add unit tests for this function.
+  // TODO: Add unit tests for this function.
   int32_t OrderPool::GetQuantityInQueue(const int64_t order_id, const bool is_visible_queue) const
   {
     const auto quantity_itr = id_to_order_map_.find(order_id);
@@ -113,7 +120,7 @@ namespace fep::srcs::order
     return is_visible_queue ? visible_quantity_itr->second : quantity_itr->second->quantity() - visible_quantity_itr->second;
   }
 
-  // Add unit tests for this function.
+  // TODO: Add unit tests for this function.
   void OrderPool::IceberReplenish(const Order &order)
   {
     const int32_t hidden_queue_quantity = GetQuantityInQueue(order.order_id(), /*is_visible_queue*/ false);
@@ -121,6 +128,36 @@ namespace fep::srcs::order
 
     id_to_visible_quantity_[order.order_id()] = hidden_quantity_to_transfer;
     symbol_to_price_to_visible_quantity_[order.symbol()][order.price()] += hidden_quantity_to_transfer;
+  }
+
+  // TODO: Add unit tests for this function.
+  bool OrderPool::OutputGtcOrders(const std::string &path)
+  {
+    std::ofstream output(path, std::ios::app);
+    if (!output.is_open())
+    {
+      return false;
+    }
+
+    for (const auto &kv : id_to_order_map_)
+    {
+      if (kv.second == nullptr || kv.second.get()->time_in_force() != TimeInForce::GTC)
+      {
+        continue;
+      }
+      const auto &jorder = kv.second.get()->to_json();
+      output << jorder << std::endl;
+    }
+    output.close();
+    return true;
+  }
+
+  // TODO: Add unit tests for this function.
+  void OrderPool::ClearPool()
+  {
+    id_to_order_map_.clear();
+    symbol_to_price_to_visible_quantity_.clear();
+    id_to_visible_quantity_.clear();
   }
 
 } // namespace fep::srcs::order

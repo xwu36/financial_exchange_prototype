@@ -20,6 +20,8 @@ namespace fep::srcs::matching_engine
   public:
     MatchingEngineImpl(const fep::lib::TickSizeRule &tick_size_rule, const uint32_t lot_size) : MatchingEngine(tick_size_rule, lot_size) {}
     absl::StatusOr<fep::lib::TradeMessage> Process(std::unique_ptr<fep::srcs::order::Order> order) override;
+    absl::Status InitOnMarketStarts(const std::string &order_one_day_ago_path) override;
+    absl::Status ClearOnMarketEnds(const std::string &state_path) override;
 
   private:
     absl::StatusOr<fep::lib::TradeMessage> Sell(std::unique_ptr<fep::srcs::order::Order> order) override;

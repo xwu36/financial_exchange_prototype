@@ -73,18 +73,18 @@ namespace fep::srcs::order
       std::unique_ptr<Order> order3 = std::make_unique<Order>(order3_json);
 
       OrderPool pool;
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 0);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("1.1")), 0);
       EXPECT_TRUE(pool.AddOrder(std::move(order1)));
       EXPECT_TRUE(pool.AddOrder(std::move(order2)));
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("2.2")), 20);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("2.2")), 20);
       EXPECT_TRUE(pool.AddOrder(std::move(order3)));
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 40);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("1.1")), 40);
       EXPECT_TRUE(pool.RemoveOrder(3));
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("1.1")), 10);
       EXPECT_TRUE(pool.ModifyOrder(1, -5));
       EXPECT_FALSE(pool.ModifyOrder(1, -50));
-      EXPECT_EQ(pool.GetQuantityForPrice(Symbol::AAPL, Price4("1.1")), 5);
+      EXPECT_EQ(pool.GetVisibleQuantityForPrice(Symbol::AAPL, Price4("1.1")), 5);
     }
   } // namespace
 } // namespace fep::srcs::order

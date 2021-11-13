@@ -12,6 +12,7 @@ cc_library(
         "//srcs/matching_engine/abstract:matching_engine",
         "//srcs/order:order_book",
         "//srcs/order:order_pool",
+        "//srcs/order:order_utils",
         "//srcs/order:order",
         "//srcs/stock:instrument_symbol",
         "@com_google_absl//absl/status:statusor",
@@ -28,6 +29,7 @@ cc_test(
         "//lib:tick_size_rule",
         "//srcs/order:order",
         "//srcs/order:order_book_entry",
+        "//srcs/order:order_utils",
         "@com_google_googletest//:gtest_main",
         "@com_github_nlohmann_json//:json",
     ]

@@ -29,14 +29,21 @@ namespace fep::srcs::order
     // Modifies the quantity for a given order.
     bool ModifyOrder(int64_t order_id, int64_t quantity_delta, const bool is_visible_queue = true);
 
-    // Returns quantity for a given price and symbol.
+    // Returns visible quantity for a given price and symbol.
     // Returns 0 if there is no match.
-    int32_t GetQuantityForPrice(fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const;
+    int32_t GetVisibleQuantityForPrice(fep::srcs::stock::Symbol symbol, const fep::lib::Price4 &price) const;
 
     // Returns offer quantity in visible or hidden queue.
     int32_t GetQuantityInQueue(int64_t order_id, bool is_visible_queue) const;
 
     void IceberReplenish(const fep::srcs::order::Order &order_id);
+
+    // Writes unmatched portion of GTC orders to a given path.
+    // Returns false if fail to open the given path.
+    bool OutputGtcOrders(const std::string &path);
+
+    // Clear this pool.
+    void ClearPool();
 
   private:
     std::unordered_map<int64_t, std::unique_ptr<Order>> id_to_order_map_;
