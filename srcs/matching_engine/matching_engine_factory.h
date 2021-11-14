@@ -10,15 +10,15 @@ namespace fep::srcs::matching_engine
   class MatchingEngineFactory
   {
   public:
-    MatchingEngineFactory(const fep::lib::TickSizeRule &tick_size_rule, const uint32_t lot_size) : tick_size_rule_(tick_size_rule), lot_size_(lot_size){};
+    MatchingEngineFactory();
     fep::srcs::matching_engine::MatchingEngineImpl ProduceMatchingEngine() const
     {
       return fep::srcs::matching_engine::MatchingEngineImpl(tick_size_rule_, lot_size_);
     }
 
   private:
-    const fep::lib::TickSizeRule tick_size_rule_;
-    const uint32_t lot_size_;
+    fep::lib::TickSizeRule tick_size_rule_;
+    uint32_t lot_size_;
   };
 
 } // namespace fep::srcs::matching_engine

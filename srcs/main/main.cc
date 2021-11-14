@@ -1,7 +1,6 @@
 #include <condition_variable>
 #include <chrono>
 #include <iostream>
-#include <fstream>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -31,8 +30,6 @@ using ::nlohmann::json;
 
 constexpr char kGtcOrdersFileName[] = "unmatched_gtc_orders.jsonl";
 
-ABSL_FLAG(uint32_t, lot_size, 100, "A lot size which shares must be a multiple of ");
-ABSL_FLAG(std::string, tick_size_rule_path, "srcs/main/data/tick_size_rule.json", "Path which stores tick_size_rule");
 ABSL_FLAG(std::string, order_file_path_prefix, "srcs/main/data/", "Directory which holds the order files");
 ABSL_FLAG(std::string, order_file_debug_path, "srcs/main/data/orders.jsonl",
           "Input order path for debugging purpose");
@@ -135,15 +132,8 @@ int main(int argc, char *argv[])
 {
   // google::InitGoogleLogging(argv[0]);
 
-  // Read tick_size rule from a file.
-  std::ifstream tick_size_f(absl::GetFlag(FLAGS_tick_size_rule_path));
-  json tick_size_j;
-  tick_size_f >> tick_size_j;
-  TickSizeRule tick_size_rule;
-  tick_size_rule.FromJson(tick_size_j);
-
   // Create a matching_engine object.
-  const MatchingEngineFactory matching_engine_factory(tick_size_rule, absl::GetFlag(FLAGS_lot_size));
+  const MatchingEngineFactory matching_engine_factory;
   MatchingEngineImpl matching_engine = matching_engine_factory.ProduceMatchingEngine();
 
   // Create a market data publiser.

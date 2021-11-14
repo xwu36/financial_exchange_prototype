@@ -38,8 +38,12 @@ cc_test(
 cc_library(
     name = "matching_engine_factory",
     hdrs = ["matching_engine_factory.h"],
+    srcs = ["matching_engine_factory.cc"],
     deps = [
         "//lib:tick_size_rule",
         ":matching_engine_impl",
+        "@com_github_gflags_gflags//:gflags",
+        "@com_github_nlohmann_json//:json",
     ],
+    data = ["data/tick_size_rule.json"]
 )
