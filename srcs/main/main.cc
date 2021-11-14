@@ -21,8 +21,10 @@
 
 using ::fep::lib::TickSizeRule;
 using ::fep::lib::TradeMessage;
+using ::fep::srcs::market_data_publisher::MarketDataPublisher;
 using ::fep::srcs::market_data_publisher::MarketDataPublisherFactory;
 using ::fep::srcs::market_data_publisher::MarketDataPublisherImpl;
+using ::fep::srcs::matching_engine::MatchingEngine;
 using ::fep::srcs::matching_engine::MatchingEngineFactory;
 using ::fep::srcs::matching_engine::MatchingEngineImpl;
 using ::fep::srcs::order::Order;
@@ -68,7 +70,7 @@ void MarketStatusChecker()
   }
 }
 
-void RunMatchingEngine(MatchingEngineImpl &matching_engine, const MarketDataPublisherImpl &market_data_publiser)
+void RunMatchingEngine(MatchingEngine &matching_engine, const MarketDataPublisher &market_data_publiser)
 {
   absl::TimeZone utc = absl::UTCTimeZone();
   while (true)
