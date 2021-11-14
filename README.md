@@ -8,3 +8,5 @@
 2. Learn how to use Bazel to build at https://docs.bazel.build/versions/main/tutorial/cpp.html
 3. Learn how to write a test using GoogleTest at https://docs.bazel.build/versions/main/cpp-use-cases.html
 
+## Design Overview
+![alt text](https://github.com/xwu36/financial_exchange_prototype/blob/master/design_overview.png)
